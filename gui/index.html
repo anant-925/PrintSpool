@@ -4,351 +4,1171 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart Campus Print Spooler - OS Daemon Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-   :root {
-      --bg-dark: #f9fafb;               /* very light gray background */
-      --card-bg: #ffffaf;               /* white cards */
-      --card-border: #e5e7eb;           /* light border */
-      --card-hover: #f1f5f9;            /* subtle hover */
-      --text-main: #111827;            /* dark text for contrast */
-      --text-muted: #6b7280;           /* muted gray */
-      --accent-blue: #3b82f6;          /* lighter blue */
-      --accent-green: #10b981;         /* keep green */
-      --accent-amber: #f59e0b;         /* keep amber */
-      --accent-purple: #a855f7;        /* keep purple */
-      --accent-red: #ef4444;           /* keep red */
-      --role-student: #3b82f6;         /* match accent blue */
-      --role-researcher: #c084fc;      /* unchanged */
-      --role-faculty: #fbbf24;         /* unchanged */
-      --state-sub: #94a3b8;            /* unchanged */
-      --state-wait: #3b82f6;           /* unchanged */
-      --state-mem: #10b981;            /* unchanged */
-      --state-swap: #f97316;           /* unchanged */
-      --state-print: #ec4899;          /* unchanged */
-      --state-done: #06b6d4;           /* unchanged */
+    :root {
+      /* Palette */
+      --bg-page: #f4f4f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #fafafa;
+      --sidebar-bg: #141414;
+      --sidebar-item-hover: #1f1f22;
+      --sidebar-item-active: #232328;
+      --sidebar-text: #909098;
+      --sidebar-text-active: #ffffff;
+      --card-border: #e8e8ec;
+      --card-border-subtle: #f0f0f4;
+      --divider: #ebebef;
+
+      /* Text */
+      --text-main: #141416;
+      --text-secondary: #52525b;
+      --text-muted: #71717a;
+      --text-dim: #a1a1aa;
+      --text-inverse: #ffffff;
+
+      /* Amber Accent */
+      --accent-amber: #f59e0b;
+      --accent-amber-hover: #d97706;
+      --accent-amber-light: #fef3c7;
+      --accent-amber-text: #92400e;
+
+      /* Semantic Status */
+      --status-green: #10b981;
+      --status-green-light: #ecfdf5;
+      --status-green-text: #065f46;
+      --status-red: #ef4444;
+      --status-red-light: #fef2f2;
+      --status-red-text: #991b1b;
+      --status-blue: #3b82f6;
+      --status-blue-light: #eff6ff;
+      --status-blue-text: #1d4ed8;
+      --status-purple: #8b5cf6;
+      --status-purple-light: #f5f3ff;
+      --status-purple-text: #6d28d9;
+
+      /* Strictly Consistent Job State Colors */
+      --state-sub: #71717a;
+      --state-sub-bg: #f4f4f5;
+      --state-wait: #f59e0b;
+      --state-wait-bg: #fef3c7;
+      --state-wait-text: #92400e;
+      --state-mem: #10b981;
+      --state-mem-bg: #ecfdf5;
+      --state-mem-text: #065f46;
+      --state-swap: #8b5cf6;
+      --state-swap-bg: #f5f3ff;
+      --state-swap-text: #6d28d9;
+      --state-print: #3b82f6;
+      --state-print-bg: #eff6ff;
+      --state-print-text: #1d4ed8;
+      --state-done: #10b981;
+      --state-done-bg: #ecfdf5;
+      --state-done-text: #065f46;
+
+      /* User Roles */
+      --role-student: #3b82f6;
+      --role-student-bg: #eff6ff;
+      --role-student-text: #1d4ed8;
+      --role-researcher: #8b5cf6;
+      --role-researcher-bg: #f5f3ff;
+      --role-researcher-text: #6d28d9;
+      --role-faculty: #f59e0b;
+      --role-faculty-bg: #fef3c7;
+      --role-faculty-text: #92400e;
+
+      /* Shadows & Radius */
+      --shadow: 0 4px 20px -2px rgba(20, 20, 24, 0.04), 0 2px 6px -1px rgba(20, 20, 24, 0.02);
+      --shadow-lg: 0 10px 30px -4px rgba(20, 20, 24, 0.08);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --radius-xl: 22px;
+      --radius-full: 9999px;
+
+      /* Fonts */
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background-color: var(--bg-dark);
+      font-family: var(--font-sans);
+      background: var(--bg-page);
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
       overflow-x: hidden;
     }
 
-    /* Header & Top Bar */
-    header {
-      background: linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 100%);
-      border-bottom: 1px solid var(--card-border);
-      padding: 12px 24px;
+    /* Layout */
+    .app-layout {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      width: 100%;
+      min-height: 100vh;
     }
 
-    .brand {
+    /* Dark Left Sidebar */
+    aside.sidebar {
+      width: 250px;
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 16px;
+      flex-shrink: 0;
+      transition: width 0.25s ease, padding 0.25s ease;
+      z-index: 50;
+    }
+
+    .brand-area {
       display: flex;
       align-items: center;
       gap: 12px;
+      padding: 4px 10px 24px;
+      border-bottom: 1px solid #202024;
     }
-    .brand-logo {
+    .brand-logo-mark {
       width: 36px;
       height: 36px;
-      background: linear-gradient(135deg, #38bdf8, #6366f1);
-      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent-amber), #ff9a1f);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+      color: #141414;
+      flex-shrink: 0;
     }
-    .brand-title h1 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      color: #1b0202;
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
-    .brand-title .badge {
-      font-size: 0.7rem;
-      color: var(--accent-blue);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 600;
+    .brand-title-text {
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: var(--text-inverse);
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+    .brand-badge-text {
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
     }
 
-    /* Master Controls */
-    .controls-bar {
+    /* Sidebar Navigation */
+    .nav-tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-top: 18px;
+      list-style: none;
+    }
+    .tab-btn {
       display: flex;
       align-items: center;
       gap: 12px;
-      flex-wrap: wrap;
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      background: transparent;
+      border: 0;
+      color: var(--sidebar-text);
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .tab-btn:hover {
+      background: var(--sidebar-item-hover);
+      color: var(--sidebar-text-active);
+    }
+    .tab-btn.active {
+      background: var(--sidebar-item-active);
+      color: var(--sidebar-text-active);
+      font-weight: 600;
+    }
+    .tab-btn svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      stroke: var(--sidebar-text);
+      transition: stroke 0.15s ease;
+    }
+    .tab-btn:hover svg {
+      stroke: var(--sidebar-text-active);
+    }
+    .tab-btn.active svg {
+      stroke: var(--accent-amber);
     }
 
-    .status-pill {
+    /* Sidebar Bottom Pro Card */
+    .sidebar-pro-card {
+      background: #1b1b1f;
+      border: 1px solid #28282d;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pro-badge-row {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 14px;
-      border-radius: 20px;
-      background: var(--card-bg);
+    }
+    .pro-crown-icon {
+      width: 22px;
+      height: 22px;
+      background: rgba(245, 158, 11, 0.15);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-amber);
+    }
+    .pro-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-inverse);
+    }
+    .pro-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+    .btn-upgrade {
+      background: var(--accent-amber);
+      color: #141414;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 4px;
+      transition: background 0.15s ease;
+    }
+    .btn-upgrade:hover {
+      background: var(--accent-amber-hover);
+    }
+
+    /* Main Content Wrapper */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--bg-page);
+    }
+
+    /* Top Bar */
+    header.top-bar {
+      height: 68px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--card-border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      gap: 16px;
+    }
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8f8fa;
       border: 1px solid var(--card-border);
+      border-radius: var(--radius-full);
+      padding: 7px 16px;
+      width: 340px;
+      max-width: 100%;
+      transition: border-color 0.15s ease;
+    }
+    .search-box:focus-within {
+      border-color: var(--accent-amber);
+      background: #ffffff;
+    }
+    .search-box input {
+      border: 0;
+      background: transparent;
+      outline: none;
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      color: var(--text-main);
+      width: 100%;
+    }
+    .search-box input::placeholder {
+      color: var(--text-dim);
+    }
+    .search-box svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--text-dim);
+      flex-shrink: 0;
+    }
+    .search-filter-btn {
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      color: var(--text-muted);
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sim-clock-display {
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-full);
+      padding: 6px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-full);
+      padding: 6px 14px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--text-main);
     }
     .status-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #64748b;
+      background: var(--text-dim);
+      transition: background-color 0.2s ease;
     }
     .status-dot.active {
-      background: var(--accent-green);
-      box-shadow: 0 0 10px var(--accent-green);
-      animation: pulse 1.8s infinite;
+      background: var(--status-green);
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+      animation: radarPulse 2s infinite ease-in-out;
     }
     .status-dot.paused {
       background: var(--accent-amber);
-      box-shadow: 0 0 10px var(--accent-amber);
+      animation: radarPulseAmber 2s infinite ease-in-out;
+    }
+    @keyframes radarPulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+      70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    @keyframes radarPulseAmber {
+      0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
+      70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
     }
 
-    .sim-clock-display {
-      font-family: "JetBrains Mono", Consolas, monospace;
-      font-size: 0.95rem;
-      color: var(--accent-blue);
-      background: #0f172a;
-      padding: 6px 14px;
-      border-radius: 8px;
-      border: 1px solid #1e293b;
-    }
-
-    .btn {
-      padding: 7px 16px;
-      border-radius: 7px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s ease;
-      display: inline-flex;
+    .speed-chip {
+      display: flex;
       align-items: center;
       gap: 6px;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #0284c7, #2563eb);
-      color: white;
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-    }
-    .btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
-    .btn-success { background: #059669; color: white; }
-    .btn-success:hover { background: #10b981; }
-    .btn-warning { background: #d97706; color: white; }
-    .btn-warning:hover { background: #f59e0b; }
-    .btn-danger { background: #dc2626; color: white; }
-    .btn-danger:hover { background: #ef4444; }
-    .btn-secondary { background: #334155; color: #cbd5e1; }
-    .btn-secondary:hover { background: #475569; color: #fff; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-    /* KPI Summary Strip */
-    .kpi-strip {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 12px;
-      padding: 16px 24px;
-      background: var(--card-bg);
-      border-bottom: 1px solid var(--card-border);
-    }
-    .kpi-card {
-      background: var(--card-bg);
+      background: #ffffff;
       border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      position: relative;
-      overflow: hidden;
+      border-radius: var(--radius-full);
+      padding: 4px 10px;
     }
-    .kpi-card::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
-    }
-    .kpi-title {
+    .speed-chip label {
       font-size: 0.72rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
       font-weight: 600;
-    }
-    .kpi-val {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-main);
-      font-family: "JetBrains Mono", monospace;
-    }
-    .kpi-sub {
-      font-size: 0.7rem;
       color: var(--text-muted);
+    }
+    .speed-chip select {
+      border: 0;
+      background: transparent;
+      outline: none;
+      font-family: var(--font-sans);
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
     }
 
-    /* Navigation Tabs */
-    .nav-tabs {
-      display: flex;
-      padding: 0 24px;
-      background: var(--bg-dark);
-      border-bottom: 1px solid var(--card-border);
-      gap: 6px;
-      overflow-x: auto;
-    }
-    .tab-btn {
-      padding: 12px 18px;
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
+    .user-profile-chip {
       display: flex;
       align-items: center;
       gap: 8px;
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s;
-      white-space: nowrap;
+      padding-left: 8px;
+      border-left: 1px solid var(--card-border-subtle);
     }
-    .tab-btn:hover {
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #141416;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .user-meta {
+      display: flex;
+      flex-direction: column;
+    }
+    .user-name {
+      font-size: 0.78rem;
+      font-weight: 700;
       color: var(--text-main);
-      background: rgba(255,255,255,0.02);
+      line-height: 1.1;
     }
-    .tab-btn.active {
-      color: var(--accent-blue);
-      border-bottom-color: var(--accent-blue);
-      background: rgba(56, 189, 248, 0.05);
+    .user-role {
+      font-size: 0.65rem;
+      color: var(--text-muted);
     }
 
-    /* Main Container */
+    /* Main Content Area */
     main {
-      flex: 1;
-      padding: 24px;
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
       max-width: 1600px;
       width: 100%;
       margin: 0 auto;
     }
 
-    .tab-content { display: none; }
-    .tab-content.active { display: block; animation: fadeIn 0.25s ease; }
-
-    /* Dashboard Grid */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
-      gap: 20px;
-      margin-bottom: 20px;
+    /* Page Title & Action Controls Header */
+    .page-header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
     }
-    .grid-1 {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
+    .page-title-wrap h1 {
+      font-size: 1.65rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-main);
+    }
+    .page-title-wrap p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
     }
 
+    .action-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      font-family: var(--font-sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 9px 16px;
+      border-radius: var(--radius-full);
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background: #141416;
+      color: #ffffff;
+      border-color: #141416;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #25252a;
+      color: var(--accent-amber);
+    }
+    .btn-secondary {
+      background: #ffffff;
+      color: var(--text-main);
+      border-color: var(--card-border);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: #f7f7f8;
+      border-color: #d8d8dc;
+    }
+    .btn-warning {
+      background: var(--accent-amber-light);
+      color: var(--accent-amber-text);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+    .btn-warning:hover:not(:disabled) {
+      background: #fde68a;
+    }
+    .btn-danger {
+      background: var(--status-red-light);
+      color: var(--status-red-text);
+      border-color: rgba(239, 68, 68, 0.25);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: #fee2e2;
+    }
+
+    /* Sensible Empty State Banner when stopped */
+    .empty-state-banner {
+      background: #ffffff;
+      border: 1px dashed var(--accent-amber);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow);
+      transition: all 0.25s ease;
+    }
+    .empty-state-banner.hidden {
+      display: none;
+    }
+    .empty-banner-content {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .empty-banner-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-amber-light);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-amber-text);
+      flex-shrink: 0;
+    }
+    .empty-banner-text h4 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .empty-banner-text p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* KPI Strip */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      width: 100%;
+    }
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--card-border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      min-height: 132px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      position: relative;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    /* First KPI as Dark Highlight Card */
+    .kpi-card:first-child {
+      background: #141416;
+      border-color: #242428;
+      color: #ffffff;
+    }
+    .kpi-card:first-child .kpi-title {
+      color: #a1a1aa;
+    }
+    .kpi-card:first-child .kpi-val {
+      color: #ffffff;
+    }
+    .kpi-card:first-child .kpi-sub {
+      color: #d4d4d8;
+    }
+
+    .kpi-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .kpi-icon-pill {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f4f4f6;
+      color: var(--text-main);
+    }
+    .kpi-card:first-child .kpi-icon-pill {
+      background: #242428;
+      color: var(--accent-amber);
+    }
+    .kpi-more-dots {
+      color: var(--text-dim);
+      cursor: pointer;
+    }
+    .kpi-card:first-child .kpi-more-dots {
+      color: #52525b;
+    }
+
+    .kpi-body {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .kpi-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .kpi-val {
+      font-family: var(--font-mono);
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+
+    .kpi-bottom-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .kpi-sub {
+      font-size: 0.74rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .kpi-trend-positive {
+      color: var(--status-green) !important;
+      font-weight: 600;
+    }
+    .kpi-sparkline {
+      width: 72px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    /* Standard Cards */
     .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      background: var(--bg-card);
+      border: 1px solid var(--card-border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 22px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
     .card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 16px;
+      gap: 12px;
       padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid var(--card-border-subtle);
+    }
+    .card-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
     }
     .card-title {
-      font-size: 0.98rem;
-      font-weight: 700;
       display: flex;
       align-items: center;
       gap: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
       color: var(--text-main);
     }
+    .card-subtitle {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
     .card-tag {
-      font-size: 0.7rem;
-      padding: 3px 8px;
-      border-radius: 4px;
-      background: #1e293b;
-      color: var(--accent-blue);
+      font-size: 0.72rem;
       font-weight: 600;
+      background: #f4f4f6;
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      white-space: nowrap;
     }
 
-    /* Module 2: Bounded Ring Buffer visualizer */
+    /* Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .grid-gantt-arena {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+    .grid-bottom-three {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* Tab Content visibility */
+    .tab-content {
+      display: none;
+      flex-direction: column;
+      gap: 22px;
+    }
+    .tab-content.active {
+      display: flex;
+    }
+
+    /* Pill-style Segmented Toggle */
+    .pill-toggle-wrap {
+      display: inline-flex;
+      background: #f4f4f6;
+      border-radius: var(--radius-full);
+      padding: 3px;
+      gap: 2px;
+    }
+    .toggle-pill {
+      background: transparent;
+      border: 0;
+      border-radius: var(--radius-full);
+      padding: 5px 12px;
+      font-family: var(--font-sans);
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .toggle-pill.active {
+      background: #141416;
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .chip-dropdown {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-full);
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    /* Donut Chart Component */
+    .donut-card-body {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .donut-visual-wrap {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .donut-svg {
+      transform: rotate(-90deg);
+    }
+    .donut-center-info {
+      position: absolute;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+    }
+    .donut-center-val {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+    .donut-center-sub {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .donut-legend-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      flex: 1;
+    }
+    .donut-legend-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.76rem;
+    }
+    .donut-legend-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+    }
+    .donut-legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .donut-legend-pct {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Contiguous Memory Arena Block Bar */
+    .arena-bar-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 12px;
+      border-top: 1px solid var(--divider);
+    }
+    .arena-bar-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .arena-bar {
+      height: 14px;
+      background: #f0f0f3;
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      border: 1px solid var(--card-border);
+    }
+    .arena-block {
+      height: 100%;
+      transition: width 0.25s ease;
+    }
+    .arena-block.free { background: #e5e5ea; }
+    .arena-block.student { background: var(--role-student); }
+    .arena-block.researcher { background: var(--role-researcher); }
+    .arena-block.faculty { background: var(--role-faculty); }
+
+    .arena-legend-row {
+      display: flex;
+      gap: 12px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+    .arena-legend-chip {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .arena-legend-chip span {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* Gantt Canvas */
+    .gantt-card-body {
+      width: 100%;
+      overflow-x: auto;
+    }
+    #ganttCanvas {
+      width: 100%;
+      height: 250px;
+      display: block;
+      border-radius: var(--radius-md);
+      background: #ffffff;
+      border: 1px solid var(--card-border-subtle);
+    }
+
+    /* Tables (Clean, thin dividers, matching reference) */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--card-border-subtle);
+      border-radius: var(--radius-md);
+      background: #ffffff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      text-align: left;
+    }
+    th {
+      background: #fafafc;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--divider);
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--divider);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+    tr:last-child td {
+      border-bottom: 0;
+    }
+    tr:hover td {
+      background: var(--bg-card-hover);
+    }
+
+    .view-all-link {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.15s ease;
+    }
+    .view-all-link:hover {
+      color: var(--accent-amber);
+    }
+
+    /* Recent Orders / Jobs List style */
+    .recent-jobs-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .recent-job-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--divider);
+      gap: 12px;
+    }
+    .recent-job-item:last-child {
+      border-bottom: 0;
+    }
+    .recent-job-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .role-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .role-avatar.avatar-student { background: var(--role-student-bg); color: var(--role-student-text); }
+    .role-avatar.avatar-researcher { background: var(--role-researcher-bg); color: var(--role-researcher-text); }
+    .role-avatar.avatar-faculty { background: var(--role-faculty-bg); color: var(--role-faculty-text); }
+
+    .job-details {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .job-client-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .job-meta-line {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    /* Tags & Status Pills */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 9px;
+      border-radius: var(--radius-full);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .tag-state-0 { background: var(--state-sub-bg); color: var(--state-sub); }
+    .tag-state-1 { background: var(--state-wait-bg); color: var(--state-wait-text); }
+    .tag-state-2 { background: var(--state-mem-bg); color: var(--state-mem-text); }
+    .tag-state-3 { background: var(--state-swap-bg); color: var(--state-swap-text); }
+    .tag-state-4 { background: var(--state-print-bg); color: var(--state-print-text); }
+    .tag-state-5 { background: var(--state-done-bg); color: var(--state-done-text); }
+
+    .tag-student { background: var(--role-student-bg); color: var(--role-student-text); }
+    .tag-researcher { background: var(--role-researcher-bg); color: var(--role-researcher-text); }
+    .tag-faculty { background: var(--role-faculty-bg); color: var(--role-faculty-text); }
+
+    /* Ring Buffer Grid */
     .ring-buffer-grid {
       display: grid;
       grid-template-columns: repeat(8, 1fr);
-      gap: 8px;
-      margin-top: 10px;
+      gap: 10px;
     }
     .buffer-slot {
-      aspect-ratio: 1;
-      background: #0f172a;
-      border: 1px dashed #334155;
-      border-radius: 8px;
+      background: #fafafa;
+      border: 1px dashed #d8d8dc;
+      border-radius: var(--radius-md);
+      padding: 10px 4px;
+      min-height: 60px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 0.72rem;
-      color: #64748b;
-      transition: all 0.2s;
-      position: relative;
+      gap: 3px;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
     }
     .buffer-slot.occupied {
-      background: linear-gradient(135deg, #1e3a8a, #0369a1);
-      border: 1px solid var(--accent-blue);
-      color: var(--text-main);
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+      background: var(--accent-amber-light);
+      border: 1px solid var(--accent-amber);
+      color: var(--accent-amber-text);
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15);
     }
     .buffer-slot .slot-num {
-      position: absolute;
-      top: 4px; left: 6px;
-      font-size: 0.6rem;
-      opacity: 0.5;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 600;
+      opacity: 0.7;
     }
     .buffer-slot .job-tag {
+      font-size: 0.74rem;
       font-weight: 700;
-      font-size: 0.8rem;
     }
 
-    /* Module 4: Hardware Printer Cards */
+    /* Disk Track */
+    .disk-track-wrap {
+      background: #fafafc;
+      border: 1px solid var(--card-border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .disk-rail {
+      position: relative;
+      height: 10px;
+      background: #e4e4e7;
+      border-radius: var(--radius-full);
+      margin: 10px 0;
+    }
+    .disk-head-pointer {
+      position: absolute;
+      top: -8px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--accent-amber);
+      color: #141416;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      transform: translateX(-50%);
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.45);
+      transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .disk-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-dim);
+    }
+
+    /* Hardware Printers */
     .printers-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
     }
     .printer-card {
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 10px;
+      background: #fafafc;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
       padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      transition: all 0.2s;
+      gap: 8px;
+      transition: all 0.15s ease;
     }
     .printer-card.busy {
-      border-color: #38bdf8;
-      box-shadow: 0 0 14px rgba(56, 189, 248, 0.15);
+      background: #ffffff;
+      border-color: var(--status-blue);
+      box-shadow: 0 2px 10px rgba(59, 130, 246, 0.1);
     }
     .printer-head {
       display: flex;
@@ -356,1210 +1176,1675 @@
       align-items: center;
     }
     .printer-id {
+      font-size: 0.8rem;
       font-weight: 700;
-      font-size: 0.88rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      color: var(--text-main);
     }
     .printer-badge {
-      font-size: 0.68rem;
-      padding: 2px 7px;
-      border-radius: 4px;
+      font-size: 0.65rem;
       font-weight: 700;
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
     }
-    .printer-badge.idle { background: #1e293b; color: #94a3b8; }
-    .printer-badge.busy { background: #0369a1; color: #38bdf8; }
-
-    /* Progress Bar */
+    .printer-badge.idle { background: #e4e4e7; color: #71717a; }
+    .printer-badge.busy { background: var(--status-blue-light); color: var(--status-blue-text); }
     .progress-bar-wrap {
-      width: 100%;
-      height: 8px;
-      background: #1e293b;
-      border-radius: 4px;
+      height: 6px;
+      background: #e4e4e7;
+      border-radius: var(--radius-full);
       overflow: hidden;
-      margin-top: 4px;
     }
     .progress-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #38bdf8, #818cf8);
-      border-radius: 4px;
+      background: var(--accent-amber);
+      border-radius: var(--radius-full);
       transition: width 0.2s ease;
     }
-    .progress-bar-fill.striped {
-      background-size: 20px 20px;
-      background-image: linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent);
-      animation: moveStripes 1s linear infinite;
-    }
 
-    /* Module 5: 64 KB Memory Arena Map */
-    .arena-bar {
-      width: 100%;
-      height: 48px;
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 8px;
-      display: flex;
-      overflow: hidden;
-      position: relative;
-      margin-top: 10px;
-    }
-    .arena-block {
-      height: 100%;
-      transition: all 0.2s;
-      position: relative;
-      cursor: pointer;
-      border-right: 1px solid rgba(0,0,0,0.5);
-    }
-    .arena-block.free {
-      background: #1e293b;
-    }
-    .arena-block.student {
-      background: linear-gradient(180deg, #0284c7, #0369a1);
-    }
-    .arena-block.researcher {
-      background: linear-gradient(180deg, #9333ea, #7e22ce);
-    }
-    .arena-block.faculty {
-      background: linear-gradient(180deg, #d97706, #b45309);
-    }
-    .arena-block:hover {
-      filter: brightness(1.25);
-      z-index: 5;
-    }
-
-    /* Module 7: SCAN Disk Rail */
-    .disk-track-wrap {
-      margin-top: 15px;
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 8px;
-      padding: 16px 20px;
-    }
-    .disk-rail {
-      position: relative;
-      height: 12px;
-      background: #1e293b;
-      border-radius: 6px;
-      margin: 25px 0 15px;
-    }
-    .disk-head-pointer {
-      position: absolute;
-      top: -10px;
-      width: 18px;
-      height: 32px;
-      background: linear-gradient(180deg, #38bdf8, #2563eb);
-      border-radius: 4px;
-      transform: translateX(-50%);
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
-      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.6rem;
-      color: var(--text-main);
-    }
-    .disk-ticks {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      font-family: monospace;
-    }
-
-    /* Forms & Dynamic Ingestion */
-    .form-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 16px;
-    }
+    /* Form Controls */
     .form-group {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
     .form-group label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
+      font-size: 0.76rem;
       font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
     }
     .form-control {
-      background: #0f172a;
-      border: 1px solid #334155;
+      background: #ffffff;
+      border: 1px solid var(--card-border);
       color: var(--text-main);
-      padding: 8px 12px;
-      border-radius: 7px;
-      font-size: 0.88rem;
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      font-family: var(--font-sans);
+      font-size: 0.84rem;
       outline: none;
-      transition: border 0.2s;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .form-control:focus {
-      border-color: var(--accent-blue);
-      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+      border-color: var(--accent-amber);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
     }
     .checkbox-group {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-top: 8px;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-main);
       cursor: pointer;
     }
-    .checkbox-group input { width: 16px; height: 16px; cursor: pointer; }
 
-    /* Tables */
-    .table-container {
-      overflow-x: auto;
-      border: 1px solid #1e293b;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
-      text-align: left;
-    }
-    th {
-      background: #0f172a;
-      color: var(--text-muted);
-      padding: 10px 14px;
-      font-weight: 600;
-      border-bottom: 1px solid #1e293b;
-    }
-    td {
-      padding: 10px 14px;
-      border-bottom: 1px solid #1e293b;
-    }
-    tr:hover { background: rgba(255,255,255,0.02); }
-
-    /* Badges */
-    .tag {
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      display: inline-block;
-    }
-    .tag-student { background: rgba(56, 189, 248, 0.15); color: var(--role-student); border: 1px solid rgba(56, 189, 248, 0.3); }
-    .tag-researcher { background: rgba(192, 132, 252, 0.15); color: var(--role-researcher); border: 1px solid rgba(192, 132, 252, 0.3); }
-    .tag-faculty { background: rgba(251, 191, 36, 0.15); color: var(--role-faculty); border: 1px solid rgba(251, 191, 36, 0.3); }
-
-    .tag-state-0 { background: #334155; color: #94a3b8; } /* SUBMITTED */
-    .tag-state-1 { background: #1e3a8a; color: #60a5fa; } /* WAITING */
-    .tag-state-2 { background: #064e3b; color: #34d399; } /* IN_MEMORY */
-    .tag-state-3 { background: #7c2d12; color: #fb923c; } /* SWAPPED */
-    .tag-state-4 { background: #831843; color: #f472b6; } /* PRINTING */
-    .tag-state-5 { background: #0f766e; color: #2dd4bf; } /* COMPLETED */
-
-    /* Terminal Log View */
+    /* Terminal Log */
     .log-terminal {
-      background: #050811;
-      border: 1px solid #1e293b;
-      border-radius: 8px;
-      padding: 14px;
-      height: 480px;
+      background: #141416;
+      border: 1px solid #242428;
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      height: 380px;
       overflow-y: auto;
-      font-family: "JetBrains Mono", Consolas, monospace;
-      font-size: 0.78rem;
-      line-height: 1.5;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      line-height: 1.6;
+      color: #e4e4e7;
     }
     .log-line {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       margin-bottom: 4px;
+      word-break: break-word;
     }
-    .log-time { color: #64748b; }
-    .log-mod { color: #38bdf8; font-weight: 600; width: 110px; }
-    .log-lvl-INFO { color: #10b981; }
-    .log-lvl-WARN { color: #f59e0b; font-weight: bold; }
-    .log-lvl-ERROR { color: #ef4444; font-weight: bold; }
+    .log-time { color: #71717a; flex-shrink: 0; }
+    .log-mod { color: #38bdf8; font-weight: 600; flex-shrink: 0; }
+    .log-lvl-INFO { color: #10b981; font-weight: 700; flex-shrink: 0; }
+    .log-lvl-WARN { color: #f59e0b; font-weight: 700; flex-shrink: 0; }
+    .log-lvl-ERROR { color: #ef4444; font-weight: 700; flex-shrink: 0; }
+    .log-lvl-DEBUG { color: #94a3b8; font-weight: 600; flex-shrink: 0; }
 
-    /* Modal */
+    /* Modal Backdrop & Box */
     .modal-backdrop {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
-      display: flex;
+      inset: 0;
+      background: rgba(18, 18, 20, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
       align-items: center;
       justify-content: center;
-      z-index: 200;
-      display: none;
+      z-index: 1000;
     }
     .modal-box {
-      background: var(--bg-dark);
-      border: 1px solid #334155;
-      border-radius: 12px;
-      width: 520px;
-      max-width: 90vw;
-      padding: 24px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      width: 90%;
+      max-width: 480px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.95); }
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+      .grid-gantt-arena { grid-template-columns: 1fr; }
+      .grid-bottom-three { grid-template-columns: 1fr; }
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
+    @media (max-width: 900px) {
+      aside.sidebar { width: 72px; padding: 20px 10px; }
+      .brand-text, .tab-btn span, .sidebar-pro-card { display: none; }
+      .tab-btn { justify-content: center; padding: 12px; }
+      header.top-bar { padding: 0 18px; }
+      .search-box { width: 220px; }
+      main { padding: 18px; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .ring-buffer-grid { grid-template-columns: repeat(4, 1fr); }
     }
-    @keyframes moveStripes {
-      from { background-position: 0 0; }
-      to { background-position: 20px 0; }
+    @media (max-width: 600px) {
+      .kpi-strip { grid-template-columns: 1fr; }
+      .search-box { display: none; }
+      .top-bar-right { gap: 6px; }
+      .sim-clock-display { font-size: 0.72rem; padding: 4px 8px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <div class="brand">
-      <div class="brand-logo">🖨️</div>
-      <div class="brand-title">
-        <h1>SMART CAMPUS PRINT SPOOLER</h1>
-        <div class="badge">Operating System Daemon &amp; Resource Manager</div>
+<div class="app-layout">
+
+  <!-- Dark Left Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="brand-area">
+        <div class="brand-logo-mark">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="2" width="12" height="6" rx="2"></rect>
+            <rect x="2" y="8" width="20" height="10" rx="3"></rect>
+            <path d="M6 14h12v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7z"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title-text">PrintSpool</span>
+          <span class="brand-badge-text">OS Daemon v2.4</span>
+        </div>
       </div>
+
+      <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('tab-overview')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+          </svg>
+          <span>Live Dashboard</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-submit')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v8m0 0l-3-3m3 3l3-3"></path>
+            <path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"></path>
+          </svg>
+          <span>Dynamic Ingestion</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-memory')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+            <path d="M9 9h6v6H9z"></path>
+            <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"></path>
+          </svg>
+          <span>Memory &amp; Disk</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-scheduler')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <circle cx="4" cy="6" r="1.5"></circle>
+            <circle cx="4" cy="12" r="1.5"></circle>
+            <circle cx="4" cy="18" r="1.5"></circle>
+          </svg>
+          <span>Scheduler &amp; Aging</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-gantt')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"></path>
+            <path d="M7 14h4v3H7z"></path>
+            <path d="M13 9h6v3h-6z"></path>
+            <path d="M9 4h7v3H9z"></path>
+          </svg>
+          <span>Gantt Timeline</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-logs')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"></polyline>
+            <line x1="12" y1="19" x2="20" y2="19"></line>
+          </svg>
+          <span>System Logs</span>
+        </button>
+      </nav>
     </div>
 
-    <div class="controls-bar">
-      <div class="status-pill">
-        <div class="status-dot" id="statusDot"></div>
-        <span id="statusText">STOPPED</span>
+    <!-- Pro / Kernel Status Card -->
+    <div class="sidebar-pro-card">
+      <div class="pro-badge-row">
+        <div class="pro-crown-icon">👑</div>
+        <span class="pro-title">POSIX Kernel Core</span>
+      </div>
+      <p class="pro-desc">Bounded ring buffer, SRTF dynamic aging &amp; 64 KB memory arena engine.</p>
+      <button class="btn-upgrade" onclick="showStartModal()">Configure Daemon →</button>
+    </div>
+  </aside>
+
+  <!-- Main Area -->
+  <div class="main-wrapper">
+
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="globalSearch" placeholder="Search jobs, clients, cylinders, logs..." oninput="handleGlobalSearch(this.value)">
+        <button class="search-filter-btn" title="Filter settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+        </button>
       </div>
 
-      <div class="sim-clock-display" id="simClock">
-        T = 0.00 s
+      <div class="top-bar-right">
+        <div class="sim-clock-display" id="simClock">
+          ⏱ T = 0.00 s
+        </div>
+
+        <div class="status-pill">
+          <div class="status-dot" id="statusDot"></div>
+          <span id="statusText">STOPPED</span>
+        </div>
+
+        <div class="speed-chip">
+          <label for="speedSelect">Speed:</label>
+          <select id="speedSelect" onchange="changeSpeed(this.value)">
+            <option value="0.5">0.5x</option>
+            <option value="1.0" selected>1.0x</option>
+            <option value="2.0">2.0x</option>
+            <option value="5.0">5.0x</option>
+            <option value="10.0">10.0x</option>
+          </select>
+        </div>
+
+        <div class="user-profile-chip">
+          <div class="user-avatar">OS</div>
+          <div class="user-meta">
+            <span class="user-name">Alex Carter</span>
+            <span class="user-role">Daemon Admin</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Body -->
+    <main>
+
+      <!-- Page Title & Top Right Actions -->
+      <div class="page-header-row">
+        <div class="page-title-wrap">
+          <h1 id="pageTitle">Print Spooler Dashboard</h1>
+          <p id="pageSubtitle">Real-time OS resource monitoring, SRTF scheduling &amp; memory arena telemetry.</p>
+        </div>
+
+        <div class="action-controls-row">
+          <button class="btn btn-primary" id="btnStart" onclick="showStartModal()">▶ Start Spooler</button>
+          <button class="btn btn-warning" id="btnPause" onclick="togglePause()" disabled>⏸ Pause</button>
+          <button class="btn btn-secondary" id="btnStep" onclick="stepClock()" disabled>⏭ Step +0.1s</button>
+          <button class="btn btn-danger" id="btnStop" onclick="stopSpooler()" disabled>⏹ Stop</button>
+        </div>
       </div>
 
-      <button class="btn btn-primary" id="btnStart" onclick="showStartModal()">▶ Start Spooler</button>
-      <button class="btn btn-warning" id="btnPause" onclick="togglePause()" disabled>⏸ Pause</button>
-      <button class="btn btn-secondary" id="btnStep" onclick="stepClock()" disabled>⏭ Step +0.1s</button>
-      <button class="btn btn-danger" id="btnStop" onclick="stopSpooler()" disabled>⏹ Stop</button>
-
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Speed:</span>
-        <select class="form-control" id="speedSelect" onchange="changeSpeed(this.value)" style="padding: 4px 8px; width: 85px;">
-          <option value="0.5">0.5x</option>
-          <option value="1.0" selected>1.0x</option>
-          <option value="2.0">2.0x</option>
-          <option value="5.0">5.0x</option>
-          <option value="10.0">10.0x</option>
-        </select>
+      <!-- Sensible Empty State Banner when daemon is stopped -->
+      <div class="empty-state-banner" id="emptyStateBanner">
+        <div class="empty-banner-content">
+          <div class="empty-banner-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <div class="empty-banner-text">
+            <h4>Spooler Daemon Offline</h4>
+            <p>The C++ simulation process is not running. Click "Start Spooler" or load a preset scenario to begin execution.</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" onclick="loadPreset('campus_normal')">Load Campus Normal</button>
+          <button class="btn btn-primary" onclick="showStartModal()">▶ Launch Daemon</button>
+        </div>
       </div>
-    </div>
-  </header>
 
-  <!-- KPI Quick Stats Strip -->
-  <div class="kpi-strip">
-    <div class="kpi-card">
-      <div class="kpi-title">Bounded Buffer</div>
-      <div class="kpi-val" id="kpiBuffer">0 / 16</div>
-      <div class="kpi-sub" id="kpiBufferSub">Capacity 16 slots</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Ready Queue</div>
-      <div class="kpi-val" id="kpiReady">0</div>
-      <div class="kpi-sub">Awaiting dispatch</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">RAM Resident</div>
-      <div class="kpi-val" id="kpiResident">0</div>
-      <div class="kpi-sub">In 64 KB Arena</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Swapped to Disk</div>
-      <div class="kpi-val" id="kpiSwapped" style="color: var(--accent-amber);">0</div>
-      <div class="kpi-sub">On swap.img</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Arena Occupancy</div>
-      <div class="kpi-val" id="kpiArena">0%</div>
-      <div class="kpi-sub" id="kpiArenaBytes">0 / 65536 B</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">SCAN Disk Head</div>
-      <div class="kpi-val" id="kpiDisk">53 ▲</div>
-      <div class="kpi-sub" id="kpiDiskSeeks">0 seeks traversed</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Printer Pool</div>
-      <div class="kpi-val" id="kpiPrinters">0 / 3</div>
-      <div class="kpi-sub">Active workers</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Total Completed</div>
-      <div class="kpi-val" id="kpiCompleted" style="color: var(--accent-green);">0</div>
-      <div class="kpi-sub" id="kpiPagesPrinted">0 pages printed</div>
-    </div>
-  </div>
+      <!-- Row of 8 KPI Cards (First Card is Dark Highlight) -->
+      <div class="kpi-strip">
+        <!-- 1. Bounded Buffer (Dark Highlight) -->
+        <div class="kpi-card">
+          <div class="kpi-top-row">
+            <div class="kpi-icon-pill">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+                <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+              </svg>
+            </div>
+            <div class="kpi-more-dots">•••</div>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-title">Bounded Buffer</div>
+            <div class="kpi-val" id="kpiBuffer">0 / 16</div>
+          </div>
+          <div class="kpi-bottom-row">
+            <div class="kpi-sub" id="kpiBufferSub">Capacity 16 slots</div>
+            <svg class="kpi-sparkline" viewBox="0 0 72 24" fill="none">
+              <path d="M2 18 C16 18, 22 8, 36 12 C50 16, 56 4, 70 8" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+          </div>
+        </div>
 
-  <!-- Tabs Navigation -->
-  <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('tab-overview')">🎛️ Live Dashboard</button>
-    <button class="tab-btn" onclick="switchTab('tab-submit')">🚀 Dynamic Job Ingestion</button>
-    <button class="tab-btn" onclick="switchTab('tab-memory')">🧠 Memory Arena &amp; Disk</button>
-    <button class="tab-btn" onclick="switchTab('tab-scheduler')">📊 Scheduler &amp; Dynamic Aging</button>
-    <button class="tab-btn" onclick="switchTab('tab-gantt')">📈 Gantt Chart Timeline</button>
-    <button class="tab-btn" onclick="switchTab('tab-logs')">📜 Real-time System Logs</button>
-  </div>
+        <!-- 2. Ready Queue -->
+        <div class="kpi-card">
+          <div class="kpi-top-row">
+            <div class="kpi-icon-pill" style="background:#eff6ff; color:#3b82f6;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <div class="kpi-more-dots">•••</div>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-title">Ready Queue</div>
+            <div class="kpi-val" id="kpiReady">0</div>
+          </div>
+          <div class="kpi-bottom-row">
+            <div class="kpi-sub">Awaiting dispatch</div>
+            <svg class="kpi-sparkline" viewBox="0 0 72 24" fill="none">
+              <path d="M2 20 C18 20, 24 14, 38 15 C52 16, 58 6, 70 8" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+          </div>
+        </div>
 
-  <!-- Main Content -->
-  <main>
+        <!-- 3. RAM Resident -->
+        <div class="kpi-card">
+          <div class="kpi-top-row">
+            <div class="kpi-icon-pill" style="background:#ecfdf5; color:#10b981;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                <path d="M9 9h6v6H9z"></path>
+              </svg>
+            </div>
+            <div class="kpi-more-dots">•••</div>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-title">RAM Resident</div>
+            <div class="kpi-val" id="kpiResident">0</div>
+          </div>
+          <div class="kpi-bottom-row">
+            <div class="kpi-sub">In 64 KB Arena</div>
+            <svg class="kpi-sparkline" viewBox="0 0 72 24" fill="none">
+              <path d="M2 19 C18 19, 26 11, 40 14 C54 17, 58 5, 70 7" stroke="#10b981" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+          </div>
+        </div>
 
-    <!-- Tab 1: Live Overview -->
-    <div class="tab-content active" id="tab-overview">
-      <div class="grid-2">
-        <!-- Module 2: Bounded Ring Buffer -->
+        <!-- 4. Swapped to Disk -->
+        <div class="kpi-card">
+          <div class="kpi-top-row">
+            <div class="kpi-icon-pill" style="background:#f5f3ff; color:#8b5cf6;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="2" width="20" height="8" rx="2"></rect>
+                <rect x="2" y="14" width="20" height="8" rx="2"></rect>
+                <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                <line x1="6" y1="18" x2="6.01" y2="18"></line>
+              </svg>
+            </div>
+            <div class="kpi-more-dots">•••</div>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-title">Swapped to Disk</div>
+            <div class="kpi-val" id="kpiSwapped" style="color: var(--state-swap-text);">0</div>
+          </div>
+          <div class="kpi-bottom-row">
+            <div class="kpi-sub">On swap.img</div>
+            <svg class="kpi-sparkline" viewBox="0 0 72 24" fill="none">
+              <path d="M2 18 C16 18, 24 16, 38 12 C52 8, 58 14, 70 10" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 5. Arena Occupancy -->
+        <div class="kpi-card">
+          <div class="kpi-top-row">
+            <div class="kpi-icon-pill" style="background:#fef3c7; color:#f59e0b;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+              </svg>
+            </div>
+            <div class="kpi-more-dots">•••</div>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-title">Arena Occupancy</div>
+            <div class="kpi-val" id="kpiArena">0%</div>
+          </div>
+          <div class="kpi-bottom-row">
+            <div class="kpi-sub" id="kpiArenaBytes">0 / 65536 B</div>
+            <svg class="kpi-sparkline" viewBox="0 0 72 24" fill="none">
+              <path d="M2 20 C18 20, 24 12, 38 14 C52 16, 56 6, 70 6" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 6. SCAN Disk Head -->
+        <div class="kpi-card">
+          <div class="kpi-top-row">
+            <div class="kpi-icon-pill" style="background:#f0fdfa; color:#0d9488;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </div>
+            <div class="kpi-more-dots">•••</div>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-title">SCAN Disk Head</div>
+            <div class="kpi-val" id="kpiDisk">53 ▲</div>
+          </div>
+          <div class="kpi-bottom-row">
+            <div class="kpi-sub" id="kpiDiskSeeks">0 seeks traversed</div>
+            <svg class="kpi-sparkline" viewBox="0 0 72 24" fill="none">
+              <path d="M2 12 C18 6, 26 18, 40 10 C54 2, 58 14, 70 8" stroke="#0d9488" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 7. Printer Pool -->
+        <div class="kpi-card">
+          <div class="kpi-top-row">
+            <div class="kpi-icon-pill" style="background:#eff6ff; color:#2563eb;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+              </svg>
+            </div>
+            <div class="kpi-more-dots">•••</div>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-title">Printer Pool</div>
+            <div class="kpi-val" id="kpiPrinters">0 / 3</div>
+          </div>
+          <div class="kpi-bottom-row">
+            <div class="kpi-sub">Active workers</div>
+            <svg class="kpi-sparkline" viewBox="0 0 72 24" fill="none">
+              <path d="M2 18 C16 18, 22 14, 38 15 C54 16, 58 8, 70 8" stroke="#2563eb" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 8. Total Completed -->
+        <div class="kpi-card">
+          <div class="kpi-top-row">
+            <div class="kpi-icon-pill" style="background:#ecfdf5; color:#10b981;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <div class="kpi-more-dots">•••</div>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-title">Total Completed</div>
+            <div class="kpi-val" id="kpiCompleted" style="color: var(--status-green);">0</div>
+          </div>
+          <div class="kpi-bottom-row">
+            <div class="kpi-sub kpi-trend-positive" id="kpiPagesPrinted">0 pages printed</div>
+            <svg class="kpi-sparkline" viewBox="0 0 72 24" fill="none">
+              <path d="M2 20 C18 20, 24 16, 38 12 C52 8, 56 6, 70 4" stroke="#10b981" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 1: Live Overview Dashboard -->
+      <div class="tab-content active" id="tab-overview">
+
+        <!-- Middle Row: Gantt Chart Card (Revenue Overview style) + Memory Donut Card (Sales by Category style) -->
+        <div class="grid-gantt-arena">
+          <!-- Large Gantt Timeline Card -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                  </svg>
+                  <span>Printer Pool Execution Timeline</span>
+                </div>
+                <div class="card-subtitle">Real-time thread lanes, job execution durations and preemption events</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="pill-toggle-wrap">
+                  <button class="toggle-pill active">Timeline</button>
+                  <button class="toggle-pill" onclick="switchTab('tab-gantt')">Expanded</button>
+                </div>
+                <a href="/api/export_gantt" class="chip-dropdown" style="text-decoration:none;" download>📥 CSV</a>
+              </div>
+            </div>
+            <div class="gantt-card-body">
+              <canvas id="ganttCanvas" width="900" height="240"></canvas>
+            </div>
+          </div>
+
+          <!-- Memory Arena Donut Chart Card -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 2a10 10 0 0 1 10 10h-10z"></path>
+                  </svg>
+                  <span>Memory Arena Allocation</span>
+                </div>
+                <div class="card-subtitle" id="arenaTag">First-Fit Allocator</div>
+              </div>
+              <span class="chip-dropdown">64 KB RAM ▾</span>
+            </div>
+
+            <!-- Donut Visual + Legend -->
+            <div class="donut-card-body">
+              <div class="donut-visual-wrap">
+                <svg class="donut-svg" width="130" height="130" viewBox="0 0 130 130">
+                  <circle cx="65" cy="65" r="48" fill="none" stroke="#e8e8ed" stroke-width="15"></circle>
+                  <circle id="donutAllocSegment" cx="65" cy="65" r="48" fill="none" stroke="#f59e0b" stroke-width="15" stroke-dasharray="0 301.6" stroke-linecap="round"></circle>
+                </svg>
+                <div class="donut-center-info">
+                  <span class="donut-center-val" id="donutAllocVal">0 KB</span>
+                  <span class="donut-center-sub">Allocated</span>
+                </div>
+              </div>
+
+              <div class="donut-legend-list">
+                <div class="donut-legend-item">
+                  <div class="donut-legend-left">
+                    <span class="donut-legend-dot" style="background:#f59e0b;"></span>
+                    <span>Allocated RAM</span>
+                  </div>
+                  <span class="donut-legend-pct" id="legendAllocPct">0%</span>
+                </div>
+                <div class="donut-legend-item">
+                  <div class="donut-legend-left">
+                    <span class="donut-legend-dot" style="background:#e4e4e7;"></span>
+                    <span>Free Arena</span>
+                  </div>
+                  <span class="donut-legend-pct" id="legendFreePct">100%</span>
+                </div>
+                <div class="donut-legend-item">
+                  <div class="donut-legend-left">
+                    <span class="donut-legend-dot" style="background:#8b5cf6;"></span>
+                    <span>Swapped Disk</span>
+                  </div>
+                  <span class="donut-legend-pct" id="legendSwapPct">0%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Restyled Contiguous Block Bar -->
+            <div class="arena-bar-wrap">
+              <div class="arena-bar-meta">
+                <span>0x0000 (0 B)</span>
+                <span id="arenaFreeText">Free: 65536 B</span>
+                <span>0xFFFF (65536 B)</span>
+              </div>
+              <div class="arena-bar" id="arenaBar"></div>
+              <div class="arena-legend-row">
+                <div class="arena-legend-chip"><span style="background:var(--role-student);"></span> Student</div>
+                <div class="arena-legend-chip"><span style="background:var(--role-researcher);"></span> Researcher</div>
+                <div class="arena-legend-chip"><span style="background:var(--role-faculty);"></span> Faculty</div>
+                <div class="arena-legend-chip"><span style="background:#e5e5ea;"></span> Free</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Row: Top Scheduled Table + Recent Jobs List + Hardware Controller -->
+        <div class="grid-bottom-three">
+
+          <!-- 1. Top Scheduled Jobs Table (Top Selling Products style) -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                <span>Ready Priority Queue</span>
+              </div>
+              <a href="#" class="view-all-link" onclick="switchTab('tab-scheduler'); return false;">View All →</a>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Job</th>
+                    <th>Role</th>
+                    <th>Pages</th>
+                    <th>Score</th>
+                  </tr>
+                </thead>
+                <tbody id="overviewSchedulerBody">
+                  <tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px;">No jobs in scheduler pool.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 2. Recent Dispatched Jobs (Recent Orders style) -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 11 12 14 22 4"></polyline>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Recent Job Activity</span>
+              </div>
+              <a href="#" class="view-all-link" onclick="switchTab('tab-scheduler'); return false;">View All →</a>
+            </div>
+            <div class="recent-jobs-list" id="overviewRecentJobsList">
+              <div style="text-align:center; color:var(--text-muted); padding:24px 0; font-size:0.78rem;">
+                No recent jobs recorded yet.
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Hardware Controller & Printer Pool -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 14 14"></polyline>
+                </svg>
+                <span>SCAN Disk Controller</span>
+              </div>
+              <div class="card-tag" id="diskDirTag">Direction: UP ▲</div>
+            </div>
+
+            <div class="disk-track-wrap">
+              <div style="display:flex; justify-content:space-between; font-size:0.78rem; font-weight:600;">
+                <span>Cylinder: <span id="currentCyl" style="color:var(--status-blue); font-family:var(--font-mono);">53</span> / 199</span>
+                <span>Seeks: <span id="totalSeeks" style="color:var(--accent-amber); font-family:var(--font-mono);">0</span></span>
+              </div>
+              <div class="disk-rail">
+                <div class="disk-head-pointer" id="diskHeadPointer" style="left: 26.6%;">▲</div>
+              </div>
+              <div class="disk-ticks">
+                <span>Cyl 0</span>
+                <span>Cyl 50</span>
+                <span>Cyl 100</span>
+                <span>Cyl 150</span>
+                <span>Cyl 199</span>
+              </div>
+            </div>
+
+            <!-- Printer Pool Row -->
+            <div style="margin-top: 4px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:0.78rem; font-weight:700; color:var(--text-main);">Worker Threads</span>
+                <span class="card-tag" id="poolTag">3 Printers Online</span>
+              </div>
+              <div class="printers-row" id="printersContainer"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Row 4: Bounded Circular Ring Buffer -->
         <div class="card">
           <div class="card-header">
             <div class="card-title">
-              <span>📥 Module 2: Bounded Circular Ring Buffer</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              </svg>
+              <span>Module 2: Bounded Circular Ring Buffer (16 Slots)</span>
             </div>
             <div class="card-tag" id="bufTag">Occupancy: 0 / 16</div>
           </div>
-          <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">
-            POSIX mutex &amp; dual condition variables (<code style="color:var(--accent-blue)">not_full</code>, <code style="color:var(--accent-blue)">not_empty</code>) protect against race conditions and buffer overflow.
+          <p style="font-size: 0.78rem; color: var(--text-muted); margin-top:-6px;">
+            Protected by POSIX mutex &amp; dual condition variables (<code style="color:var(--status-blue)">not_full</code>, <code style="color:var(--status-blue)">not_empty</code>) preventing buffer overflow.
           </p>
           <div class="ring-buffer-grid" id="bufferSlotsGrid"></div>
         </div>
 
-        <!-- Module 4: Hardware Printers -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <span>🖨️ Module 4: Emulated Hardware Printer Pool</span>
+      </div>
+
+      <!-- TAB 2: Dynamic Job Ingestion -->
+      <div class="tab-content" id="tab-submit">
+        <div class="grid-2">
+          <!-- Submission Form -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span>⚡ Live Runtime Job Submission</span>
+              </div>
+              <div class="card-tag">Dynamic Ingestion</div>
             </div>
-            <div class="card-tag" id="poolTag">3 Printers Online</div>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">
+              Submit a job directly to the running spooler daemon. The Ingestion Controller validates parameters and enqueues into the ring buffer.
+            </p>
+
+            <form id="submitJobForm" onsubmit="handleLiveSubmit(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="formJobId">Job ID (0 for Auto)</label>
+                  <input type="number" class="form-control" id="formJobId" value="0" min="0">
+                </div>
+                <div class="form-group">
+                  <label for="formClientId">Client / User ID</label>
+                  <input type="text" class="form-control" id="formClientId" value="prof_sen">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="formRole">User Role (Priority Weight)</label>
+                  <select class="form-control" id="formRole">
+                    <option value="student">Student (Standard Weight)</option>
+                    <option value="researcher">Researcher (+8 Priority Weight)</option>
+                    <option value="faculty" selected>Faculty (+16 Priority Weight)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="formPages">Total Pages: <span id="pageVal" style="color:var(--status-blue); font-weight:700;">15</span></label>
+                  <input type="range" class="form-control" id="formPages" min="1" max="100" value="15" oninput="document.getElementById('pageVal').innerText = this.value">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="formDocName">Document Name</label>
+                  <input type="text" class="form-control" id="formDocName" value="Exam_Paper.pdf">
+                </div>
+                <div class="form-group" style="justify-content: flex-end;">
+                  <label class="checkbox-group">
+                    <input type="checkbox" id="formUrgency" checked>
+                    <span>Urgent Job (+20 Score Bonus)</span>
+                  </label>
+                  <label class="checkbox-group">
+                    <input type="checkbox" id="formDuplex" checked>
+                    <span>Duplex Printing (Two-sided)</span>
+                  </label>
+                </div>
+              </div>
+
+              <div style="margin-top: 10px;">
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 11px;">
+                  🚀 Submit Job to Running Daemon
+                </button>
+              </div>
+            </form>
+
+            <!-- Quick Burst Buttons -->
+            <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--divider);">
+              <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 10px;">
+                One-Click Workload Bursts:
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-secondary" onclick="quickBurst('student')">⚡ 1 Student (2p)</button>
+                <button class="btn btn-secondary" onclick="quickBurst('researcher')">🔬 1 Researcher (18p)</button>
+                <button class="btn btn-secondary" onclick="quickBurst('faculty')">🎓 1 Faculty Exam (45p)</button>
+                <button class="btn btn-warning" onclick="quickBurst('burst5')">💥 Traffic Spike (5 Jobs)</button>
+              </div>
+            </div>
           </div>
-          <div class="printers-row" id="printersContainer"></div>
+
+          <!-- Pre-Execution Staging Queue -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span>📋 Pre-Execution Staging Queue</span>
+              </div>
+              <div class="card-tag" id="stagedCount">0 Staged</div>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">
+              Stage jobs before launching or load predefined test scenarios.
+            </p>
+
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+              <button class="btn btn-secondary" onclick="loadPreset('campus_normal')">Preset: Campus Normal</button>
+              <button class="btn btn-secondary" onclick="loadPreset('tc01_starvation')">Preset: TC-01 Aging</button>
+              <button class="btn btn-secondary" onclick="loadPreset('tc03_swap_stress')">Preset: TC-03 Swap</button>
+              <button class="btn btn-danger" style="margin-left: auto;" onclick="clearStaged()">Clear</button>
+            </div>
+
+            <div class="table-container" style="max-height: 320px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Client</th>
+                    <th>Role</th>
+                    <th>Pages</th>
+                    <th>Urgent</th>
+                    <th>Duplex</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="stagedTableBody">
+                  <tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:24px;">No staged jobs.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="grid-2">
-        <!-- Module 5: 64 KB Memory Arena Map -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <span>🧠 Module 5: Contiguous 64 KB Memory Arena Map</span>
-            </div>
-            <div class="card-tag" id="arenaTag">First-Fit Allocator</div>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted);">
-            <span>0x0000 (0 B)</span>
-            <span id="arenaFreeText">Free: 65536 B</span>
-            <span>0xFFFF (65536 B)</span>
-          </div>
-          <div class="arena-bar" id="arenaBar"></div>
-          <div style="display: flex; gap: 14px; margin-top: 12px; font-size: 0.75rem; color: var(--text-muted);">
-            <span style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; background:#38bdf8; border-radius:2px;"></span> Student</span>
-            <span style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; background:#a855f7; border-radius:2px;"></span> Researcher</span>
-            <span style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; background:#f59e0b; border-radius:2px;"></span> Faculty</span>
-            <span style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; background:#1e293b; border-radius:2px;"></span> Free Block</span>
-          </div>
-        </div>
-
-        <!-- Module 7: SCAN Disk Controller -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <span>💾 Module 7: SCAN Disk Controller (Elevator Algorithm)</span>
-            </div>
-            <div class="card-tag" id="diskDirTag">Direction: UP ▲</div>
-          </div>
-          <div class="disk-track-wrap">
-            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600;">
-              <span>Current Cylinder: <span id="currentCyl" style="color:var(--accent-blue)">53</span> / 199</span>
-              <span>Total Seeks: <span id="totalSeeks" style="color:var(--accent-amber)">0</span> cylinders</span>
-            </div>
-            <div class="disk-rail">
-              <div class="disk-head-pointer" id="diskHeadPointer" style="left: 26.6%;">▲</div>
-            </div>
-            <div class="disk-ticks">
-              <span>Cyl 0</span>
-              <span>Cyl 50</span>
-              <span>Cyl 100</span>
-              <span>Cyl 150</span>
-              <span>Cyl 199</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab 2: Dynamic Job Ingestion -->
-    <div class="tab-content" id="tab-submit">
-      <div class="grid-2">
-        <!-- Live Runtime Submission Form -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <span>⚡ Submit Job at Runtime</span>
-            </div>
-            <div class="card-tag">Dynamic Ingestion</div>
-          </div>
-          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 16px;">
-            Submit a job directly to the actively running print spooler daemon. The Ingestion Controller will validate parameters and enqueue it into the circular ring buffer immediately!
-          </p>
-
-          <form id="submitJobForm" onsubmit="handleLiveSubmit(event)">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Job ID (0 for Auto)</label>
-                <input type="number" class="form-control" id="formJobId" value="0" min="0">
+      <!-- TAB 3: Memory Arena & Disk Detail -->
+      <div class="tab-content" id="tab-memory">
+        <div class="grid-2">
+          <!-- Memory Blocks Table -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span>🧱 First-Fit Memory Arena Allocations</span>
               </div>
-              <div class="form-group">
-                <label>Client / User ID</label>
-                <input type="text" class="form-control" id="formClientId" value="prof_sen">
-              </div>
+              <div class="card-tag">64 KB Contiguous</div>
             </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>User Role (Priority Weight)</label>
-                <select class="form-control" id="formRole">
-                  <option value="student">Student (Standard Weight)</option>
-                  <option value="researcher">Researcher (+8 Priority Weight)</option>
-                  <option value="faculty" selected>Faculty (+16 Priority Weight)</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Total Pages (1 to 100): <span id="pageVal" style="color:var(--accent-blue); font-weight:700;">15</span></label>
-                <input type="range" class="form-control" id="formPages" min="1" max="100" value="15" oninput="document.getElementById('pageVal').innerText = this.value">
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Document Name</label>
-                <input type="text" class="form-control" id="formDocName" value="Exam_Paper.pdf">
-              </div>
-              <div class="form-group" style="justify-content: flex-end;">
-                <label class="checkbox-group">
-                  <input type="checkbox" id="formUrgency" checked>
-                  <span>Urgent Job (+20 Score Bonus)</span>
-                </label>
-                <label class="checkbox-group">
-                  <input type="checkbox" id="formDuplex" checked>
-                  <span>Duplex Printing (Two-sided)</span>
-                </label>
-              </div>
-            </div>
-
-            <div style="margin-top: 20px; display: flex; gap: 12px;">
-              <button type="submit" class="btn btn-primary" style="flex: 1; padding: 10px;">
-                🚀 Submit Job to Running Daemon
-              </button>
-            </div>
-          </form>
-
-          <!-- Quick Bursts -->
-          <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--card-border);">
-            <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 10px;">
-              Quick Traffic Generators &amp; Bursts (One-Click Ingestion):
-            </div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button class="btn btn-secondary" onclick="quickBurst('student')">⚡ 1 Student Job (2p)</button>
-              <button class="btn btn-secondary" onclick="quickBurst('researcher')">🔬 1 Researcher (18p, Duplex)</button>
-              <button class="btn btn-secondary" onclick="quickBurst('faculty')">🎓 1 Faculty Exam (45p, Urgent)</button>
-              <button class="btn btn-warning" onclick="quickBurst('burst5')">💥 Traffic Spike (5 Jobs)</button>
+            <div class="table-container" style="max-height: 420px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Arena Offset</th>
+                    <th>Block Size</th>
+                    <th>Status</th>
+                    <th>Job ID</th>
+                    <th>Header Magic</th>
+                  </tr>
+                </thead>
+                <tbody id="memoryBlocksTable"></tbody>
+              </table>
             </div>
           </div>
-        </div>
 
-        <!-- Pre-Execution Staging Area -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <span>📋 Pre-Execution Staging Queue</span>
+          <!-- Swapped to Disk Table -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span>💾 LRU Swapped-Out Jobs</span>
+              </div>
+              <div class="card-tag" id="swappedTag">0 on disk</div>
             </div>
-            <div class="card-tag" id="stagedCount">0 Staged</div>
-          </div>
-          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">
-            Feed jobs before execution, or choose from pre-configured OS test scenario benchmarks.
-          </p>
-
-          <div style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
-            <button class="btn btn-secondary" onclick="loadPreset('campus_normal')">Preset: Campus Normal</button>
-            <button class="btn btn-secondary" onclick="loadPreset('tc01_starvation')">Preset: TC-01 Aging</button>
-            <button class="btn btn-secondary" onclick="loadPreset('tc03_swap_stress')">Preset: TC-03 Swap Stress</button>
-            <button class="btn btn-danger" style="margin-left: auto;" onclick="clearStaged()">Clear</button>
-          </div>
-
-          <div class="table-container" style="max-height: 300px;">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Client</th>
-                  <th>Role</th>
-                  <th>Pages</th>
-                  <th>Urgent</th>
-                  <th>Duplex</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="stagedTableBody">
-                <tr><td colspan="7" style="text-align:center; color:#64748b;">No staged jobs. Load a preset or add jobs above.</td></tr>
-              </tbody>
-            </table>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">
+              When RAM is exhausted, lower-priority idle resident jobs are evicted to simulated disk cylinders in <code style="color:var(--status-blue)">swap.img</code>.
+            </p>
+            <div class="table-container" style="max-height: 420px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Job ID</th>
+                    <th>Client</th>
+                    <th>Role</th>
+                    <th>Size</th>
+                    <th>Cylinder</th>
+                    <th>State</th>
+                  </tr>
+                </thead>
+                <tbody id="swappedTableBody">
+                  <tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:24px;">No jobs currently swapped to disk.</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Tab 3: Memory & Disk Detail -->
-    <div class="tab-content" id="tab-memory">
-      <div class="grid-2">
-        <!-- Memory Blocks Table -->
+      <!-- TAB 4: Scheduler & Dynamic Aging -->
+      <div class="tab-content" id="tab-scheduler">
         <div class="card">
           <div class="card-header">
             <div class="card-title">
-              <span>🧱 First-Fit Memory Arena Allocations</span>
+              <span>📊 Hybrid SRTF &amp; Dynamic Priority Aging Ready Pool</span>
             </div>
-            <div class="card-tag">64 KB Contiguous</div>
+            <div class="card-tag">Lower Score = Dispatched First</div>
           </div>
-          <div class="table-container" style="max-height: 400px;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Arena Offset</th>
-                  <th>Block Size</th>
-                  <th>Status</th>
-                  <th>Job ID</th>
-                  <th>Header Magic</th>
-                </tr>
-              </thead>
-              <tbody id="memoryBlocksTable"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Swapped to Disk Table -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <span>💾 Virtual Memory: LRU Swapped-Out Jobs</span>
-            </div>
-            <div class="card-tag" id="swappedTag">0 on disk</div>
-          </div>
-          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-            When the 64 KB RAM arena is full, lower-priority idle resident jobs are evicted to simulated disk cylinders in <code style="color:var(--accent-blue)">swap.img</code> via SCAN disk I/O.
+          <p style="font-size: 0.8rem; color: var(--text-muted);">
+            Formula: <code style="color:var(--status-blue)">Score = 1.0 × Remaining_Pages - Role_Weight - Aging_Boost - Urgency_Bonus</code>.<br>
+            Dynamic aging elevates waiting jobs after 4.0s at 5.0 points/sec to eliminate starvation!
           </p>
-          <div class="table-container" style="max-height: 400px;">
+          <div class="table-container">
             <table>
               <thead>
                 <tr>
                   <th>Job ID</th>
                   <th>Client</th>
                   <th>Role</th>
-                  <th>Size</th>
-                  <th>Assigned Cylinder</th>
-                  <th>State</th>
+                  <th>Pages Left</th>
+                  <th>Wait Time</th>
+                  <th>SRTF Term</th>
+                  <th>Role Bonus</th>
+                  <th>Aging Bonus</th>
+                  <th>Urgency</th>
+                  <th>Dynamic Score</th>
+                  <th>Current State</th>
                 </tr>
               </thead>
-              <tbody id="swappedTableBody">
-                <tr><td colspan="6" style="text-align:center; color:#64748b;">No jobs currently swapped to disk.</td></tr>
-              </tbody>
+              <tbody id="schedulerTableBody"></tbody>
             </table>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Tab 4: Scheduler & Aging -->
-    <div class="tab-content" id="tab-scheduler">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <span>📊 Hybrid SRTF &amp; Dynamic Priority Aging Ready Pool</span>
-          </div>
-          <div class="card-tag">Lower Score = Dispatched First</div>
-        </div>
-        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-          Formula: <code style="color:var(--accent-blue)">Score = 1.0 × Pages - Role_Weight - Aging_Boost - Urgency_Bonus</code>.
-          Dynamic aging elevates waiting jobs after 4.0s at 5.0 points/sec to eliminate starvation!
-        </p>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Job ID</th>
-                <th>Client</th>
-                <th>Role</th>
-                <th>Pages Left</th>
-                <th>Wait Time</th>
-                <th>SRTF Term</th>
-                <th>Role Bonus</th>
-                <th>Aging Bonus</th>
-                <th>Urgency</th>
-                <th>Dynamic Score</th>
-                <th>Current State</th>
-              </tr>
-            </thead>
-            <tbody id="schedulerTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab 5: Gantt Timeline -->
-    <div class="tab-content" id="tab-gantt">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <span>📈 Emulated Hardware Printers Gantt Timeline</span>
-          </div>
-          <div style="display: flex; gap: 8px;">
+      <!-- TAB 5: Full Gantt Timeline -->
+      <div class="tab-content" id="tab-gantt">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>📈 Emulated Hardware Printers Gantt Timeline</span>
+            </div>
             <a href="/api/export_gantt" class="btn btn-secondary" style="text-decoration:none;" download>📥 Download Gantt CSV</a>
           </div>
-        </div>
-        <canvas id="ganttCanvas" width="1200" height="320" style="width: 100%; height: 320px; background: #070b13; border-radius: 8px; border: 1px solid #1e293b;"></canvas>
-      </div>
-    </div>
-
-    <!-- Tab 6: Real-time Logs -->
-    <div class="tab-content" id="tab-logs">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <span>📜 Real-Time Daemon Event Log &amp; State Transitions</span>
-          </div>
-          <div style="display:flex; gap: 10px;">
-            <input type="text" class="form-control" id="logSearch" placeholder="Filter logs..." oninput="renderLogs()" style="width: 180px; padding: 4px 8px;">
-            <select class="form-control" id="logModFilter" onchange="renderLogs()" style="width: 130px; padding: 4px 8px;">
-              <option value="ALL">All Modules</option>
-              <option value="INGESTION">INGESTION</option>
-              <option value="RING_BUFFER">RING_BUFFER</option>
-              <option value="SCHEDULER">SCHEDULER</option>
-              <option value="PRINTER_WORKER">PRINTER</option>
-              <option value="ARENA">ARENA</option>
-              <option value="SWAP_ENGINE">SWAP_ENGINE</option>
-              <option value="DISK_SCAN">DISK_SCAN</option>
-              <option value="STATE_MACHINE">STATE_MACHINE</option>
-            </select>
+          <div class="gantt-card-body">
+            <canvas id="ganttCanvasFull" width="1200" height="340" style="width: 100%; height: 340px; background: #ffffff; border-radius: var(--radius-md); border: 1px solid var(--card-border-subtle);"></canvas>
           </div>
         </div>
-        <div class="log-terminal" id="logTerminal"></div>
       </div>
+
+      <!-- TAB 6: Real-time System Logs -->
+      <div class="tab-content" id="tab-logs">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>📜 Real-Time Daemon Event Log &amp; State Transitions</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <input type="text" class="form-control" id="logSearch" placeholder="Filter logs..." oninput="renderLogs()" style="width: 180px; padding: 5px 10px;">
+              <select class="form-control" id="logModFilter" onchange="renderLogs()" style="width: 140px; padding: 5px 10px;">
+                <option value="ALL">All Modules</option>
+                <option value="INGESTION">INGESTION</option>
+                <option value="RING_BUFFER">RING_BUFFER</option>
+                <option value="SCHEDULER">SCHEDULER</option>
+                <option value="PRINTER_WORKER">PRINTER</option>
+                <option value="ARENA">ARENA</option>
+                <option value="SWAP_ENGINE">SWAP_ENGINE</option>
+                <option value="DISK_SCAN">DISK_SCAN</option>
+                <option value="STATE_MACHINE">STATE_MACHINE</option>
+              </select>
+            </div>
+          </div>
+          <div class="log-terminal" id="logTerminal"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Launch Configuration Modal -->
+<div class="modal-backdrop" id="startModal">
+  <div class="modal-box">
+    <h3 style="margin-bottom: 16px; font-weight:800; font-size:1.15rem; color:var(--text-main);">Configure &amp; Launch Spooler Daemon</h3>
+    <div class="form-group" style="margin-bottom: 14px;">
+      <label for="cfgPrinters">Hardware Printer Worker Threads</label>
+      <input type="number" class="form-control" id="cfgPrinters" value="3" min="1" max="16">
+    </div>
+    <div class="form-group" style="margin-bottom: 14px;">
+      <label for="cfgPageTime">Print Time (Simulated seconds per page)</label>
+      <input type="number" class="form-control" id="cfgPageTime" value="0.2" step="0.05" min="0.05">
+    </div>
+    <div class="form-group" style="margin-bottom: 20px;">
+      <label class="checkbox-group">
+        <input type="checkbox" id="cfgRealtime">
+        <span>Real-time Wall Clock Pacing (Unchecked = Fast Virtual Clock)</span>
+      </label>
     </div>
 
-  </main>
-
-  <!-- Start Configuration Modal -->
-  <div class="modal-backdrop" id="startModal">
-    <div class="modal-box">
-      <h3 style="margin-bottom: 16px; color:#fff;">Configure &amp; Launch Spooler Daemon</h3>
-      <div class="form-group" style="margin-bottom: 14px;">
-        <label>Hardware Printer Worker Threads</label>
-        <input type="number" class="form-control" id="cfgPrinters" value="3" min="1" max="16">
-      </div>
-      <div class="form-group" style="margin-bottom: 14px;">
-        <label>Print Time (Simulated seconds per page)</label>
-        <input type="number" class="form-control" id="cfgPageTime" value="0.2" step="0.05" min="0.05">
-      </div>
-      <div class="form-group" style="margin-bottom: 18px;">
-        <label class="checkbox-group">
-          <input type="checkbox" id="cfgRealtime">
-          <span>Real-time Wall Clock Pacing (Unchecked = Fast Virtual Clock)</span>
-        </label>
-      </div>
-
-      <div style="display: flex; justify-content: flex-end; gap: 10px;">
-        <button class="btn btn-secondary" onclick="hideStartModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="launchSpooler()">🚀 Launch Spooler</button>
-      </div>
+    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+      <button class="btn btn-secondary" onclick="hideStartModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="launchSpooler()">🚀 Launch Spooler</button>
     </div>
   </div>
+</div>
 
-  <script>
-    // State
-    let isRunning = false;
-    let isPaused = false;
-    let stagedJobsList = [];
-    let logBuffer = [];
-    let ganttData = [];
-    let pollInterval = null;
+<script>
+  // State variables
+  let isRunning = false;
+  let isPaused = false;
+  let stagedJobsList = [];
+  let logBuffer = [];
+  let ganttData = [];
+  let pollInterval = null;
+  let latestSchedulerJobs = [];
 
-    // Buffer visualizer generator (16 slots)
-    function initBufferGrid() {
-      const grid = document.getElementById('bufferSlotsGrid');
-      grid.innerHTML = '';
-      for (let i = 0; i < 16; ++i) {
-        const slot = document.createElement('div');
-        slot.className = 'buffer-slot';
-        slot.id = `buf-slot-${i}`;
-        slot.innerHTML = `<span class="slot-num">#${i}</span><span class="job-tag">EMPTY</span>`;
-        grid.appendChild(slot);
+  // Buffer visualizer generator (16 slots)
+  function initBufferGrid() {
+    const grid = document.getElementById('bufferSlotsGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    for (let i = 0; i < 16; ++i) {
+      const slot = document.createElement('div');
+      slot.className = 'buffer-slot';
+      slot.id = `buf-slot-${i}`;
+      slot.innerHTML = `<span class="slot-num">#${i}</span><span class="job-tag">EMPTY</span>`;
+      grid.appendChild(slot);
+    }
+  }
+  initBufferGrid();
+
+  // Tab switching
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    const target = document.getElementById(tabId);
+    if (target) target.classList.add('active');
+
+    // Sync button highlight
+    const matchingBtn = document.querySelector(`.tab-btn[onclick*="${tabId}"]`);
+    if (matchingBtn) matchingBtn.classList.add('active');
+
+    const titles = {
+      'tab-overview': ['Print Spooler Dashboard', 'Real-time OS resource monitoring, SRTF scheduling & memory arena telemetry.'],
+      'tab-submit': ['Dynamic Job Ingestion', 'Submit print jobs at runtime or stage predefined benchmark workloads.'],
+      'tab-memory': ['Memory Arena & Virtual Disk', 'Contiguous 64 KB first-fit allocator map and LRU virtual disk swap engine.'],
+      'tab-scheduler': ['Scheduler & Dynamic Aging', 'SRTF priority scheduler with anti-starvation dynamic priority aging.'],
+      'tab-gantt': ['Gantt Chart Timeline', 'Execution timeline and thread concurrency visualization across emulated printers.'],
+      'tab-logs': ['Real-Time System Logs', 'Live daemon state machine transitions, I/O events, and mutex concurrency logs.']
+    };
+    if (titles[tabId]) {
+      const titleEl = document.getElementById('pageTitle');
+      const subEl = document.getElementById('pageSubtitle');
+      if (titleEl) titleEl.innerText = titles[tabId][0];
+      if (subEl) subEl.innerText = titles[tabId][1];
+    }
+
+    if (tabId === 'tab-gantt' || tabId === 'tab-overview') renderGantt();
+  }
+
+  // Modal
+  function showStartModal() { document.getElementById('startModal').style.display = 'flex'; }
+  function hideStartModal() { document.getElementById('startModal').style.display = 'none'; }
+
+  // Start Spooler
+  async function launchSpooler() {
+    const printers = parseInt(document.getElementById('cfgPrinters').value) || 3;
+    const pageTime = parseFloat(document.getElementById('cfgPageTime').value) || 0.2;
+    const realtime = document.getElementById('cfgRealtime').checked;
+
+    hideStartModal();
+    const res = await fetch('/api/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        printers: printers,
+        page_time: pageTime,
+        realtime: realtime,
+        staged_jobs: stagedJobsList
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      startPolling();
+    } else {
+      alert(data.error || 'Failed to start daemon');
+    }
+  }
+
+  // Pause / Resume
+  async function togglePause() {
+    const endpoint = isPaused ? '/api/resume' : '/api/pause';
+    await fetch(endpoint, { method: 'POST' });
+  }
+
+  // Step
+  async function stepClock() {
+    await fetch('/api/step', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ delta: 0.1 })
+    });
+  }
+
+  // Stop
+  async function stopSpooler() {
+    if (confirm('Stop the Smart Campus Print Spooler daemon?')) {
+      await fetch('/api/stop', { method: 'POST' });
+    }
+  }
+
+  // Speed
+  async function changeSpeed(val) {
+    await fetch('/api/speed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ speed: parseFloat(val) })
+    });
+  }
+
+  // Live submit form
+  async function handleLiveSubmit(e) {
+    e.preventDefault();
+    const id = parseInt(document.getElementById('formJobId').value) || 0;
+    const client = document.getElementById('formClientId').value.trim();
+    const role = document.getElementById('formRole').value;
+    const pages = parseInt(document.getElementById('formPages').value) || 1;
+    const docName = document.getElementById('formDocName').value.trim();
+    const urgency = document.getElementById('formUrgency').checked;
+    const duplex = document.getElementById('formDuplex').checked;
+
+    const jobObj = { id, client, role, pages, doc_name: docName, urgency, duplex };
+
+    if (!isRunning) {
+      stagedJobsList.push(jobObj);
+      renderStagedTable();
+      alert(`Spooler is not currently running. Job staged in pre-execution queue (Total staged: ${stagedJobsList.length}). Click 'Start Spooler' to execute.`);
+      return;
+    }
+
+    const res = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(jobObj)
+    });
+    const data = await res.json();
+    if (!data.success) {
+      alert(data.error || 'Submission failed');
+    }
+  }
+
+  // Quick burst generator
+  async function quickBurst(type) {
+    let jobs = [];
+    const rand = Math.floor(Math.random() * 900) + 100;
+    if (type === 'student') {
+      jobs.push({ id: 0, client: `stud_${rand}`, role: 'student', pages: Math.floor(Math.random()*3)+1, urgency: false, duplex: false, doc_name: `Assignment_${rand}.pdf` });
+    } else if (type === 'researcher') {
+      jobs.push({ id: 0, client: `res_${rand}`, role: 'researcher', pages: Math.floor(Math.random()*15)+10, urgency: false, duplex: true, doc_name: `PaperDraft_${rand}.pdf` });
+    } else if (type === 'faculty') {
+      jobs.push({ id: 0, client: `prof_${rand}`, role: 'faculty', pages: Math.floor(Math.random()*30)+25, urgency: true, duplex: true, doc_name: `ExamBooklet_${rand}.pdf` });
+    } else if (type === 'burst5') {
+      for (let i = 0; i < 5; ++i) {
+        const r = ['student', 'student', 'researcher', 'faculty'][Math.floor(Math.random()*4)];
+        const p = r === 'student' ? Math.floor(Math.random()*4)+1 : Math.floor(Math.random()*25)+5;
+        jobs.push({ id: 0, client: `burst_${rand}_${i}`, role: r, pages: p, urgency: (Math.random()>0.7), duplex: (Math.random()>0.5), doc_name: `BurstDoc_${i}.pdf` });
       }
     }
-    initBufferGrid();
 
-    // Tab switching
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      event.currentTarget.classList.add('active');
-      if (tabId === 'tab-gantt') renderGantt();
+    if (!isRunning) {
+      stagedJobsList.push(...jobs);
+      renderStagedTable();
+      return;
     }
 
-    // Modal
-    function showStartModal() { document.getElementById('startModal').style.display = 'flex'; }
-    function hideStartModal() { document.getElementById('startModal').style.display = 'none'; }
+    await fetch('/api/batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jobs })
+    });
+  }
 
-    // Start Spooler
-    async function launchSpooler() {
-      const printers = parseInt(document.getElementById('cfgPrinters').value) || 3;
-      const pageTime = parseFloat(document.getElementById('cfgPageTime').value) || 0.2;
-      const realtime = document.getElementById('cfgRealtime').checked;
-
-      hideStartModal();
-      const res = await fetch('/api/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          printers: printers,
-          page_time: pageTime,
-          realtime: realtime,
-          staged_jobs: stagedJobsList
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        startPolling();
-      } else {
-        alert(data.error || 'Failed to start daemon');
-      }
-    }
-
-    // Pause / Resume
-    async function togglePause() {
-      const endpoint = isPaused ? '/api/resume' : '/api/pause';
-      await fetch(endpoint, { method: 'POST' });
-    }
-
-    // Step
-    async function stepClock() {
-      await fetch('/api/step', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ delta: 0.1 })
-      });
-    }
-
-    // Stop
-    async function stopSpooler() {
-      if (confirm('Stop the Smart Campus Print Spooler daemon?')) {
-        await fetch('/api/stop', { method: 'POST' });
-      }
-    }
-
-    // Speed
-    async function changeSpeed(val) {
-      await fetch('/api/speed', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ speed: parseFloat(val) })
-      });
-    }
-
-    // Live submit form
-    async function handleLiveSubmit(e) {
-      e.preventDefault();
-      const id = parseInt(document.getElementById('formJobId').value) || 0;
-      const client = document.getElementById('formClientId').value.trim();
-      const role = document.getElementById('formRole').value;
-      const pages = parseInt(document.getElementById('formPages').value) || 1;
-      const docName = document.getElementById('formDocName').value.trim();
-      const urgency = document.getElementById('formUrgency').checked;
-      const duplex = document.getElementById('formDuplex').checked;
-
-      const jobObj = { id, client, role, pages, doc_name: docName, urgency, duplex };
-
-      if (!isRunning) {
-        // Stage it if not running
-        stagedJobsList.push(jobObj);
-        renderStagedTable();
-        alert(`Spooler is not currently running. Job staged in pre-execution queue (Total staged: ${stagedJobsList.length}). Click 'Start Spooler' to execute.`);
-        return;
-      }
-
-      const res = await fetch('/api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(jobObj)
-      });
-      const data = await res.json();
-      if (!data.success) {
-        alert(data.error || 'Submission failed');
-      }
-    }
-
-    // Quick burst generator
-    async function quickBurst(type) {
-      let jobs = [];
-      const rand = Math.floor(Math.random() * 900) + 100;
-      if (type === 'student') {
-        jobs.push({ id: 0, client: `stud_${rand}`, role: 'student', pages: Math.floor(Math.random()*3)+1, urgency: false, duplex: false, doc_name: `Assignment_${rand}.pdf` });
-      } else if (type === 'researcher') {
-        jobs.push({ id: 0, client: `res_${rand}`, role: 'researcher', pages: Math.floor(Math.random()*15)+10, urgency: false, duplex: true, doc_name: `PaperDraft_${rand}.pdf` });
-      } else if (type === 'faculty') {
-        jobs.push({ id: 0, client: `prof_${rand}`, role: 'faculty', pages: Math.floor(Math.random()*30)+25, urgency: true, duplex: true, doc_name: `ExamBooklet_${rand}.pdf` });
-      } else if (type === 'burst5') {
-        for (let i = 0; i < 5; ++i) {
-          const r = ['student', 'student', 'researcher', 'faculty'][Math.floor(Math.random()*4)];
-          const p = r === 'student' ? Math.floor(Math.random()*4)+1 : Math.floor(Math.random()*25)+5;
-          jobs.push({ id: 0, client: `burst_${rand}_${i}`, role: r, pages: p, urgency: (Math.random()>0.7), duplex: (Math.random()>0.5), doc_name: `BurstDoc_${i}.pdf` });
-        }
-      }
-
-      if (!isRunning) {
-        stagedJobsList.push(...jobs);
-        renderStagedTable();
-        return;
-      }
-
-      await fetch('/api/batch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jobs })
-      });
-    }
-
-    // Presets
-    async function loadPreset(key) {
-      const res = await fetch('/api/presets');
-      const presets = await res.json();
-      if (presets[key]) {
-        stagedJobsList = [...presets[key].jobs];
-        renderStagedTable();
-      }
-    }
-
-    function clearStaged() {
-      stagedJobsList = [];
+  // Presets
+  async function loadPreset(key) {
+    const res = await fetch('/api/presets');
+    const presets = await res.json();
+    if (presets[key]) {
+      stagedJobsList = [...presets[key].jobs];
       renderStagedTable();
     }
+  }
 
-    function renderStagedTable() {
-      const tbody = document.getElementById('stagedTableBody');
-      document.getElementById('stagedCount').innerText = `${stagedJobsList.length} Staged`;
-      if (stagedJobsList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#64748b;">No staged jobs.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = stagedJobsList.map((j, idx) => `
-        <tr>
-          <td>${j.id || (idx+1)}</td>
-          <td>${j.client}</td>
-          <td><span class="tag tag-${j.role}">${j.role.toUpperCase()}</span></td>
-          <td>${j.pages}</td>
-          <td>${j.urgency ? '🔥 Yes' : 'No'}</td>
-          <td>${j.duplex ? '📄 Yes' : 'No'}</td>
-          <td><button class="btn btn-secondary" style="padding:2px 8px; font-size:0.7rem;" onclick="stagedJobsList.splice(${idx},1); renderStagedTable();">✕</button></td>
-        </tr>
-      `).join('');
+  function clearStaged() {
+    stagedJobsList = [];
+    renderStagedTable();
+  }
+
+  function renderStagedTable() {
+    const tbody = document.getElementById('stagedTableBody');
+    document.getElementById('stagedCount').innerText = `${stagedJobsList.length} Staged`;
+    if (stagedJobsList.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:24px;">No staged jobs. Load a preset or add jobs above.</td></tr>';
+      return;
     }
+    tbody.innerHTML = stagedJobsList.map((j, idx) => `
+      <tr>
+        <td style="font-family:var(--font-mono);">${j.id || (idx+1)}</td>
+        <td style="font-weight:600;">${j.client}</td>
+        <td><span class="tag tag-${j.role}">${j.role.toUpperCase()}</span></td>
+        <td style="font-family:var(--font-mono);">${j.pages}</td>
+        <td>${j.urgency ? '🔥 Yes' : 'No'}</td>
+        <td>${j.duplex ? '📄 Yes' : 'No'}</td>
+        <td><button class="btn btn-secondary" style="padding:2px 8px; font-size:0.7rem;" onclick="stagedJobsList.splice(${idx},1); renderStagedTable();">✕</button></td>
+      </tr>
+    `).join('');
+  }
 
-    // Main polling loop
-    function startPolling() {
-      if (pollInterval) clearInterval(pollInterval);
-      pollInterval = setInterval(pollState, 150);
+  // Global search handler
+  function handleGlobalSearch(val) {
+    const search = val.toLowerCase().trim();
+    if (!search) {
+      renderSchedulerTable(latestSchedulerJobs, 0);
+      return;
     }
+    const filtered = latestSchedulerJobs.filter(j => 
+      j.client.toLowerCase().includes(search) || 
+      j.role.toLowerCase().includes(search) || 
+      String(j.id).includes(search)
+    );
+    renderSchedulerTable(filtered, 0);
+  }
 
-    async function pollState() {
-      try {
-        const res = await fetch('/api/state');
-        const state = await res.json();
-        updateUI(state);
-      } catch (e) {
-        console.error('Poll error', e);
-      }
+  // Main polling loop
+  function startPolling() {
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = setInterval(pollState, 150);
+  }
+
+  async function pollState() {
+    try {
+      const res = await fetch('/api/state');
+      const state = await res.json();
+      updateUI(state);
+    } catch (e) {
+      console.error('Poll error', e);
     }
+  }
 
-    function updateUI(state) {
-      isRunning = state.running;
-      isPaused = state.paused;
+  function updateUI(state) {
+    isRunning = state.running;
+    isPaused = state.paused;
 
-      const dot = document.getElementById('statusDot');
-      const txt = document.getElementById('statusText');
-      const clock = document.getElementById('simClock');
+    const dot = document.getElementById('statusDot');
+    const txt = document.getElementById('statusText');
+    const clock = document.getElementById('simClock');
+    const emptyBanner = document.getElementById('emptyStateBanner');
 
-      if (isRunning) {
-        if (isPaused) {
-          dot.className = 'status-dot paused';
-          txt.innerText = 'PAUSED';
-          document.getElementById('btnPause').innerText = '▶ Resume';
-        } else {
-          dot.className = 'status-dot active';
-          txt.innerText = 'RUNNING';
-          document.getElementById('btnPause').innerText = '⏸ Pause';
-        }
-        document.getElementById('btnStart').disabled = true;
-        document.getElementById('btnPause').disabled = false;
-        document.getElementById('btnStep').disabled = false;
-        document.getElementById('btnStop').disabled = false;
+    if (isRunning) {
+      if (emptyBanner) emptyBanner.classList.add('hidden');
+      if (isPaused) {
+        dot.className = 'status-dot paused';
+        txt.innerText = 'PAUSED';
+        document.getElementById('btnPause').innerText = '▶ Resume';
       } else {
-        dot.className = 'status-dot';
-        txt.innerText = 'STOPPED';
-        document.getElementById('btnStart').disabled = false;
-        document.getElementById('btnPause').disabled = true;
-        document.getElementById('btnStep').disabled = true;
-        document.getElementById('btnStop').disabled = true;
+        dot.className = 'status-dot active';
+        txt.innerText = 'RUNNING';
+        document.getElementById('btnPause').innerText = '⏸ Pause';
       }
-
-      clock.innerText = `T = ${(state.sim_time || 0).toFixed(2)} s`;
-
-      // Update telemetry components
-      if (state.telemetry) {
-        const t = state.telemetry;
-
-        // KPI
-        document.getElementById('kpiBuffer').innerText = `${t.buffer.size} / ${t.buffer.capacity}`;
-        document.getElementById('bufTag').innerText = `Occupancy: ${t.buffer.size} / ${t.buffer.capacity}`;
-        document.getElementById('kpiReady').innerText = t.scheduler.ready;
-        document.getElementById('kpiResident').innerText = t.scheduler.in_memory;
-        document.getElementById('kpiSwapped').innerText = t.scheduler.swapped;
-        document.getElementById('kpiArena').innerText = `${(t.arena.occupancy_ratio * 100).toFixed(1)}%`;
-        document.getElementById('kpiArenaBytes').innerText = `${t.arena.allocated_bytes} / ${t.arena.total_size} B`;
-        document.getElementById('kpiDisk').innerText = `${t.disk.head} ${t.disk.direction_up ? '▲' : '▼'}`;
-        document.getElementById('kpiDiskSeeks').innerText = `${t.disk.total_seeks} seeks traversed`;
-        document.getElementById('kpiCompleted').innerText = t.completed_jobs;
-        document.getElementById('kpiPagesPrinted').innerText = `${t.pages_printed} pages printed`;
-
-        // Active printers count
-        const busyCount = t.printers.filter(p => p.busy).length;
-        document.getElementById('kpiPrinters').innerText = `${busyCount} / ${t.printers.length}`;
-        document.getElementById('poolTag').innerText = `${busyCount} / ${t.printers.length} Busy`;
-
-        // Buffer Grid
-        renderBufferGrid(t.buffer);
-
-        // Printers
-        renderPrinters(t.printers);
-
-        // Arena Bar
-        renderArena(t.arena);
-
-        // Disk Head
-        renderDisk(t.disk);
-
-        // Scheduler Table
-        renderSchedulerTable(t.scheduler.jobs, state.sim_time);
-
-        // Swapped Table
-        renderSwappedTable(t.scheduler.jobs);
-
-        // Memory Blocks Table
-        renderMemoryBlocksTable(t.arena.blocks);
-      }
-
-      // Logs
-      if (state.logs) {
-        logBuffer = state.logs;
-        renderLogs();
-      }
-
-      // Gantt
-      if (state.gantt) {
-        ganttData = state.gantt;
-        if (document.getElementById('tab-gantt').classList.contains('active')) {
-          renderGantt();
-        }
-      }
+      document.getElementById('btnStart').disabled = true;
+      document.getElementById('btnPause').disabled = false;
+      document.getElementById('btnStep').disabled = false;
+      document.getElementById('btnStop').disabled = false;
+    } else {
+      if (emptyBanner) emptyBanner.classList.remove('hidden');
+      dot.className = 'status-dot';
+      txt.innerText = 'STOPPED';
+      document.getElementById('btnStart').disabled = false;
+      document.getElementById('btnPause').disabled = true;
+      document.getElementById('btnStep').disabled = true;
+      document.getElementById('btnStop').disabled = true;
     }
 
-    function renderBufferGrid(buf) {
-      for (let i = 0; i < 16; ++i) {
-        const slot = document.getElementById(`buf-slot-${i}`);
-        if (!slot) continue;
-        if (i < buf.items.length) {
-          const item = buf.items[i];
-          slot.className = 'buffer-slot occupied';
-          slot.innerHTML = `<span class="slot-num">#${i}</span><span class="job-tag">Job #${item.id}</span><span style="font-size:0.65rem;">${item.pages}p</span>`;
-        } else {
-          slot.className = 'buffer-slot';
-          slot.innerHTML = `<span class="slot-num">#${i}</span><span class="job-tag" style="opacity:0.3;">EMPTY</span>`;
-        }
-      }
+    clock.innerText = `⏱ T = ${(state.sim_time || 0).toFixed(2)} s`;
+
+    if (state.telemetry) {
+      const t = state.telemetry;
+      latestSchedulerJobs = t.scheduler.jobs || [];
+
+      // KPIs
+      document.getElementById('kpiBuffer').innerText = `${t.buffer.size} / ${t.buffer.capacity}`;
+      document.getElementById('bufTag').innerText = `Occupancy: ${t.buffer.size} / ${t.buffer.capacity}`;
+      document.getElementById('kpiReady').innerText = t.scheduler.ready;
+      document.getElementById('kpiResident').innerText = t.scheduler.in_memory;
+      document.getElementById('kpiSwapped').innerText = t.scheduler.swapped;
+      document.getElementById('kpiArena').innerText = `${(t.arena.occupancy_ratio * 100).toFixed(1)}%`;
+      document.getElementById('kpiArenaBytes').innerText = `${t.arena.allocated_bytes} / ${t.arena.total_size} B`;
+      document.getElementById('kpiDisk').innerText = `${t.disk.head} ${t.disk.direction_up ? '▲' : '▼'}`;
+      document.getElementById('kpiDiskSeeks').innerText = `${t.disk.total_seeks} seeks traversed`;
+      document.getElementById('kpiCompleted').innerText = t.completed_jobs;
+      document.getElementById('kpiPagesPrinted').innerText = `${t.pages_printed} pages printed`;
+
+      const busyCount = t.printers.filter(p => p.busy).length;
+      document.getElementById('kpiPrinters').innerText = `${busyCount} / ${t.printers.length}`;
+      document.getElementById('poolTag').innerText = `${busyCount} / ${t.printers.length} Busy`;
+
+      // Components
+      renderBufferGrid(t.buffer);
+      renderPrinters(t.printers);
+      renderArena(t.arena);
+      renderDisk(t.disk);
+      renderSchedulerTable(t.scheduler.jobs, state.sim_time);
+      renderSwappedTable(t.scheduler.jobs);
+      renderMemoryBlocksTable(t.arena.blocks);
     }
 
-    function renderPrinters(printers) {
-      const container = document.getElementById('printersContainer');
-      container.innerHTML = printers.map(p => {
-        const pct = (p.total_pages > 0) ? Math.min(100, Math.round((p.current_page / p.total_pages) * 100)) : 0;
-        return `
-          <div class="printer-card ${p.busy ? 'busy' : ''}">
-            <div class="printer-head">
-              <div class="printer-id">🖨️ Printer #${p.id}</div>
-              <span class="printer-badge ${p.busy ? 'busy' : 'idle'}">${p.busy ? 'PRINTING' : 'IDLE'}</span>
-            </div>
-            ${p.busy ? `
-              <div style="font-size:0.8rem; font-weight:600;">Job #${p.job_id} (${p.role})</div>
-              <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted);">
-                <span>Progress: ${p.current_page} / ${p.total_pages} p</span>
-                <span>${pct}%</span>
-              </div>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar-fill striped" style="width: ${pct}%;"></div>
-              </div>
-              <div style="font-size:0.7rem; color:var(--text-muted);">${p.duplex ? '📄 Duplex flip active' : 'Simplex single-side'}</div>
-            ` : `
-              <div style="font-size:0.75rem; color:#64748b; padding:12px 0; text-align:center;">Waiting for dispatched jobs...</div>
-            `}
+    if (state.logs) {
+      logBuffer = state.logs;
+      renderLogs();
+    }
+
+    if (state.gantt) {
+      ganttData = state.gantt;
+      renderGantt();
+    }
+  }
+
+  function renderBufferGrid(buf) {
+    for (let i = 0; i < 16; ++i) {
+      const slot = document.getElementById(`buf-slot-${i}`);
+      if (!slot) continue;
+      if (i < buf.items.length) {
+        const item = buf.items[i];
+        slot.className = 'buffer-slot occupied';
+        slot.innerHTML = `<span class="slot-num">#${i}</span><span class="job-tag">Job #${item.id}</span><span style="font-size:0.65rem; font-family:var(--font-mono);">${item.pages}p</span>`;
+      } else {
+        slot.className = 'buffer-slot';
+        slot.innerHTML = `<span class="slot-num">#${i}</span><span class="job-tag" style="opacity:0.35;">EMPTY</span>`;
+      }
+    }
+  }
+
+  function renderPrinters(printers) {
+    const container = document.getElementById('printersContainer');
+    if (!container) return;
+    container.innerHTML = printers.map(p => {
+      const pct = (p.total_pages > 0) ? Math.min(100, Math.round((p.current_page / p.total_pages) * 100)) : 0;
+      return `
+        <div class="printer-card ${p.busy ? 'busy' : ''}">
+          <div class="printer-head">
+            <div class="printer-id">🖨️ Printer #${p.id}</div>
+            <span class="printer-badge ${p.busy ? 'busy' : 'idle'}">${p.busy ? 'PRINTING' : 'IDLE'}</span>
           </div>
-        `;
-      }).join('');
-    }
+          ${p.busy ? `
+            <div style="font-size:0.78rem; font-weight:700;">Job #${p.job_id} (${p.role})</div>
+            <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted); font-family:var(--font-mono);">
+              <span>${p.current_page} / ${p.total_pages} p</span>
+              <span>${pct}%</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" style="width: ${pct}%;"></div>
+            </div>
+            <div style="font-size:0.68rem; color:var(--text-muted);">${p.duplex ? '📄 Duplex flip active' : 'Simplex single-side'}</div>
+          ` : `
+            <div style="font-size:0.72rem; color:var(--text-muted); padding:8px 0; text-align:center;">Awaiting jobs...</div>
+          `}
+        </div>
+      `;
+    }).join('');
+  }
 
-    function renderArena(arena) {
-      const bar = document.getElementById('arenaBar');
-      document.getElementById('arenaFreeText').innerText = `Free: ${arena.free_bytes} B (${((arena.free_bytes/arena.total_size)*100).toFixed(1)}%)`;
+  function renderArena(arena) {
+    const bar = document.getElementById('arenaBar');
+    const freeText = document.getElementById('arenaFreeText');
+    const freePct = ((arena.free_bytes / arena.total_size) * 100).toFixed(1);
+    const allocPct = ((arena.allocated_bytes / arena.total_size) * 100).toFixed(1);
+
+    if (freeText) freeText.innerText = `Free: ${arena.free_bytes} B (${freePct}%)`;
+
+    if (bar) {
       bar.innerHTML = arena.blocks.map(b => {
         const widthPct = (b.size / arena.total_size) * 100;
         if (widthPct < 0.05) return '';
-        const cls = b.is_free ? 'free' : 'student';
-        return `<div class="arena-block ${cls}" style="width: ${widthPct}%;" title="Offset: ${b.offset}, Size: ${b.size} B, Job #${b.job_id}"></div>`;
+        const cls = b.is_free ? 'free' : (b.role ? b.role.toLowerCase() : 'student');
+        return `<div class="arena-block ${cls}" style="width: ${widthPct}%;" title="Offset: 0x${b.offset.toString(16).toUpperCase()} (${b.offset}), Size: ${b.size} B, Job #${b.job_id}"></div>`;
       }).join('');
     }
 
-    function renderDisk(disk) {
-      document.getElementById('currentCyl').innerText = disk.head;
-      document.getElementById('totalSeeks').innerText = disk.total_seeks;
-      document.getElementById('diskDirTag').innerText = `Direction: ${disk.direction_up ? 'UP ▲' : 'DOWN ▼'}`;
-      const pct = (disk.head / 199) * 100;
-      document.getElementById('diskHeadPointer').style.left = `${pct}%`;
-    }
+    // Update Donut Chart
+    const totalCircumference = 301.6; // 2 * PI * 48
+    const allocSegment = document.getElementById('donutAllocSegment');
+    const donutVal = document.getElementById('donutAllocVal');
+    const legendAlloc = document.getElementById('legendAllocPct');
+    const legendFree = document.getElementById('legendFreePct');
 
-    function renderSchedulerTable(jobs, now) {
-      const tbody = document.getElementById('schedulerTableBody');
+    if (allocSegment) {
+      const strokeDash = (arena.allocated_bytes / arena.total_size) * totalCircumference;
+      allocSegment.setAttribute('stroke-dasharray', `${strokeDash} ${totalCircumference}`);
+    }
+    if (donutVal) {
+      donutVal.innerText = (arena.allocated_bytes >= 1024) 
+        ? `${(arena.allocated_bytes / 1024).toFixed(1)} KB` 
+        : `${arena.allocated_bytes} B`;
+    }
+    if (legendAlloc) legendAlloc.innerText = `${allocPct}%`;
+    if (legendFree) legendFree.innerText = `${freePct}%`;
+  }
+
+  function renderDisk(disk) {
+    document.getElementById('currentCyl').innerText = disk.head;
+    document.getElementById('totalSeeks').innerText = disk.total_seeks;
+    document.getElementById('diskDirTag').innerText = `Direction: ${disk.direction_up ? 'UP ▲' : 'DOWN ▼'}`;
+    const pct = (disk.head / 199) * 100;
+    document.getElementById('diskHeadPointer').style.left = `${pct}%`;
+  }
+
+  function renderSchedulerTable(jobs, now) {
+    const tbody = document.getElementById('schedulerTableBody');
+    if (tbody) {
       if (!jobs || jobs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; color:#64748b;">No active jobs in scheduler pool.</td></tr>';
-        return;
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; color:var(--text-muted); padding:24px;">No active jobs in scheduler pool.</td></tr>';
+      } else {
+        tbody.innerHTML = jobs.map(j => {
+          const wait = Math.max(0, (now - j.arrival)).toFixed(2);
+          const agingBonus = (wait > 4.0) ? (5.0 * (wait - 4.0)).toFixed(1) : '0.0';
+          return `
+            <tr style="${j.state === 'WAITING' ? 'background: var(--state-wait-bg);' : ''}">
+              <td style="font-weight:700; font-family:var(--font-mono);">#${j.id}</td>
+              <td style="font-weight:600;">${j.client}</td>
+              <td><span class="tag tag-${j.role.toLowerCase()}">${j.role}</span></td>
+              <td style="font-family:var(--font-mono);">${j.remaining} / ${j.pages}</td>
+              <td style="font-family:var(--font-mono);">${wait} s</td>
+              <td style="font-family:var(--font-mono);">${j.remaining.toFixed(1)}</td>
+              <td style="font-family:var(--font-mono);">${j.role === 'FACULTY' ? '-16.0' : (j.role === 'RESEARCHER' ? '-8.0' : '0.0')}</td>
+              <td style="color:${parseFloat(agingBonus)>0?'var(--accent-amber)':'inherit'}; font-weight:${parseFloat(agingBonus)>0?'700':'400'}; font-family:var(--font-mono);">-${agingBonus}</td>
+              <td>${j.urgency ? '🔥 -20.0' : '0.0'}</td>
+              <td style="font-weight:700; color:var(--status-blue); font-family:var(--font-mono);">${j.score.toFixed(2)}</td>
+              <td><span class="tag tag-state-${j.state_id}">${j.state}</span></td>
+            </tr>
+          `;
+        }).join('');
       }
-      tbody.innerHTML = jobs.map(j => {
-        const wait = Math.max(0, (now - j.arrival)).toFixed(2);
-        const agingBonus = (wait > 4.0) ? (5.0 * (wait - 4.0)).toFixed(1) : '0.0';
-        return `
-          <tr style="${j.state === 'WAITING' ? 'background: rgba(59,130,246,0.05);' : ''}">
-            <td style="font-weight:700;">#${j.id}</td>
-            <td>${j.client}</td>
+    }
+
+    // Update Overview Tables
+    renderOverviewWidgets(jobs);
+  }
+
+  function renderOverviewWidgets(jobs) {
+    const overviewSched = document.getElementById('overviewSchedulerBody');
+    const recentList = document.getElementById('overviewRecentJobsList');
+
+    if (overviewSched) {
+      if (!jobs || jobs.length === 0) {
+        overviewSched.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px;">No jobs in scheduler pool.</td></tr>';
+      } else {
+        const topJobs = [...jobs].sort((a,b) => a.score - b.score).slice(0, 4);
+        overviewSched.innerHTML = topJobs.map(j => `
+          <tr>
+            <td style="font-weight:700; font-family:var(--font-mono);">#${j.id}</td>
             <td><span class="tag tag-${j.role.toLowerCase()}">${j.role}</span></td>
-            <td>${j.remaining} / ${j.pages}</td>
-            <td>${wait} s</td>
-            <td>${j.remaining.toFixed(1)}</td>
-            <td>${j.role === 'FACULTY' ? '-16.0' : (j.role === 'RESEARCHER' ? '-8.0' : '0.0')}</td>
-            <td style="color:${parseFloat(agingBonus)>0?'#f59e0b':'inherit'}; font-weight:${parseFloat(agingBonus)>0?'bold':'normal'};">-${agingBonus}</td>
-            <td>${j.urgency ? '🔥 -20.0' : '0.0'}</td>
-            <td style="font-weight:700; color:var(--accent-blue);">${j.score.toFixed(2)}</td>
-            <td><span class="tag tag-state-${j.state_id}">${j.state}</span></td>
+            <td style="font-family:var(--font-mono);">${j.remaining}p</td>
+            <td style="font-family:var(--font-mono); font-weight:700; color:var(--status-blue);">${j.score.toFixed(1)}</td>
           </tr>
-        `;
-      }).join('');
-    }
-
-    function renderSwappedTable(jobs) {
-      const tbody = document.getElementById('swappedTableBody');
-      const swapped = (jobs || []).filter(j => j.state === 'SWAPPED_TO_DISK');
-      document.getElementById('swappedTag').innerText = `${swapped.length} on disk`;
-      if (swapped.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#64748b;">No jobs currently swapped to disk.</td></tr>';
-        return;
+        `).join('');
       }
-      tbody.innerHTML = swapped.map(j => `
-        <tr>
-          <td style="font-weight:700;">#${j.id}</td>
-          <td>${j.client}</td>
-          <td><span class="tag tag-${j.role.toLowerCase()}">${j.role}</span></td>
-          <td>${j.arena_size} B</td>
-          <td style="color:var(--accent-amber); font-weight:700;">Cylinder #${j.swap_cylinder}</td>
-          <td><span class="tag tag-state-3">SWAPPED_TO_DISK</span></td>
-        </tr>
-      `).join('');
     }
 
-    function renderMemoryBlocksTable(blocks) {
-      const tbody = document.getElementById('memoryBlocksTable');
-      if (!blocks) return;
-      tbody.innerHTML = blocks.map(b => `
-        <tr>
-          <td style="font-family:monospace;">0x${b.offset.toString(16).padStart(4,'0').toUpperCase()} (${b.offset})</td>
-          <td>${b.size} bytes</td>
-          <td><span class="tag ${b.is_free ? 'tag-state-0' : 'tag-state-2'}">${b.is_free ? 'FREE BLOCK' : 'ALLOCATED'}</span></td>
-          <td>${b.is_free ? '-' : `Job #${b.job_id}`}</td>
-          <td style="font-family:monospace; color:#64748b;">0x5A5A</td>
-        </tr>
-      `).join('');
+    if (recentList) {
+      if (!jobs || jobs.length === 0) {
+        recentList.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:24px 0; font-size:0.78rem;">No recent jobs recorded yet.</div>';
+      } else {
+        const recent = jobs.slice(0, 4);
+        recentList.innerHTML = recent.map(j => {
+          const initials = (j.client || 'U').replace(/[^a-zA-Z]/g, '').slice(0, 2).toUpperCase() || 'JB';
+          return `
+            <div class="recent-job-item">
+              <div class="recent-job-left">
+                <div class="role-avatar avatar-${j.role.toLowerCase()}">${initials}</div>
+                <div class="job-details">
+                  <span class="job-client-name">${j.client}</span>
+                  <span class="job-meta-line">#${j.id} • ${j.pages} pages</span>
+                </div>
+              </div>
+              <span class="tag tag-state-${j.state_id}">${j.state}</span>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+  }
+
+  function renderSwappedTable(jobs) {
+    const tbody = document.getElementById('swappedTableBody');
+    const swapped = (jobs || []).filter(j => j.state === 'SWAPPED_TO_DISK');
+    document.getElementById('swappedTag').innerText = `${swapped.length} on disk`;
+    
+    // Update donut swapped percentage
+    const swapLegend = document.getElementById('legendSwapPct');
+    if (swapLegend) {
+      swapLegend.innerText = swapped.length > 0 ? `${swapped.length} jobs` : '0%';
     }
 
-    function renderLogs() {
-      const terminal = document.getElementById('logTerminal');
-      const search = (document.getElementById('logSearch').value || '').toLowerCase();
-      const mod = document.getElementById('logModFilter').value;
-
-      const filtered = logBuffer.filter(l => {
-        if (mod !== 'ALL' && l.module !== mod) return false;
-        if (search && !l.msg.toLowerCase().includes(search) && !l.module.toLowerCase().includes(search)) return false;
-        return true;
-      });
-
-      terminal.innerHTML = filtered.map(l => `
-        <div class="log-line">
-          <span class="log-time">[T=${(l.time||0).toFixed(2).padStart(6, ' ')}s]</span>
-          <span class="log-mod">[${l.module}]</span>
-          <span class="log-lvl-${(l.level||'').trim()}">${l.level}</span>
-          <span>${l.msg}</span>
-        </div>
-      `).join('');
-      terminal.scrollTop = terminal.scrollHeight;
+    if (swapped.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:24px;">No jobs currently swapped to disk.</td></tr>';
+      return;
     }
+    tbody.innerHTML = swapped.map(j => `
+      <tr>
+        <td style="font-weight:700; font-family:var(--font-mono);">#${j.id}</td>
+        <td style="font-weight:600;">${j.client}</td>
+        <td><span class="tag tag-${j.role.toLowerCase()}">${j.role}</span></td>
+        <td style="font-family:var(--font-mono);">${j.arena_size} B</td>
+        <td style="color:var(--accent-amber); font-weight:700; font-family:var(--font-mono);">Cylinder #${j.swap_cylinder}</td>
+        <td><span class="tag tag-state-3">SWAPPED_TO_DISK</span></td>
+      </tr>
+    `).join('');
+  }
 
-    function renderGantt() {
-      const canvas = document.getElementById('ganttCanvas');
-      if (!canvas) return;
+  function renderMemoryBlocksTable(blocks) {
+    const tbody = document.getElementById('memoryBlocksTable');
+    if (!blocks || !tbody) return;
+    tbody.innerHTML = blocks.map(b => `
+      <tr>
+        <td style="font-family:var(--font-mono);">0x${b.offset.toString(16).padStart(4,'0').toUpperCase()} (${b.offset})</td>
+        <td style="font-family:var(--font-mono);">${b.size} bytes</td>
+        <td><span class="tag ${b.is_free ? 'tag-state-0' : 'tag-state-2'}">${b.is_free ? 'FREE BLOCK' : 'ALLOCATED'}</span></td>
+        <td style="font-weight:600;">${b.is_free ? '-' : `Job #${b.job_id}`}</td>
+        <td style="font-family:var(--font-mono); color:var(--text-dim);">0x5A5A</td>
+      </tr>
+    `).join('');
+  }
+
+  function renderLogs() {
+    const terminal = document.getElementById('logTerminal');
+    if (!terminal) return;
+    const search = (document.getElementById('logSearch').value || '').toLowerCase();
+    const mod = document.getElementById('logModFilter').value;
+
+    const filtered = logBuffer.filter(l => {
+      if (mod !== 'ALL' && l.module !== mod) return false;
+      if (search && !l.msg.toLowerCase().includes(search) && !l.module.toLowerCase().includes(search)) return false;
+      return true;
+    });
+
+    terminal.innerHTML = filtered.map(l => `
+      <div class="log-line">
+        <span class="log-time">[T=${(l.time||0).toFixed(2).padStart(6, ' ')}s]</span>
+        <span class="log-mod">[${l.module}]</span>
+        <span class="log-lvl-${(l.level||'').trim()}">${l.level}</span>
+        <span>${l.msg}</span>
+      </div>
+    `).join('');
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  // Gantt Chart Renderer (Clean Light Theme per-printer lanes)
+  function renderGantt() {
+    const canvases = [document.getElementById('ganttCanvas'), document.getElementById('ganttCanvasFull')].filter(Boolean);
+    canvases.forEach(canvas => {
       const ctx = canvas.getContext('2d');
       const w = canvas.width;
       const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
 
-      ctx.fillStyle = '#64748b';
-      ctx.font = '12px monospace';
-      ctx.fillText('Hardware Printers Execution Timeline (Gantt)', 20, 25);
+      // Light theme background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
 
       const numPrinters = 3;
-      const rowHeight = 60;
-      const startY = 50;
+      const leftMargin = 95;
+      const rightMargin = 25;
+      const topMargin = 25;
+      const bottomMargin = 30;
+      const plotWidth = w - leftMargin - rightMargin;
+      const plotHeight = h - topMargin - bottomMargin;
+      const laneHeight = plotHeight / numPrinters;
 
+      // Draw per-printer track lanes
       for (let p = 0; p < numPrinters; ++p) {
-        const y = startY + p * rowHeight;
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(80, y, w - 100, 40);
-        ctx.fillStyle = '#94a3b8';
-        ctx.fillText(`Printer #${p}`, 10, y + 25);
+        const y = topMargin + p * laneHeight;
+        
+        // Track background
+        ctx.fillStyle = '#f4f4f6';
+        if (ctx.roundRect) {
+          ctx.beginPath();
+          ctx.roundRect(leftMargin, y + 4, plotWidth, laneHeight - 8, 8);
+          ctx.fill();
+        } else {
+          ctx.fillRect(leftMargin, y + 4, plotWidth, laneHeight - 8);
+        }
+
+        // Label
+        ctx.fillStyle = '#141416';
+        ctx.font = '600 12px Inter, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`Worker #${p}`, leftMargin - 12, y + laneHeight / 2);
+      }
+
+      // Time axis ticks
+      const maxTime = Math.max(10, ...(ganttData || []).map(d => d.time || 0));
+      const step = maxTime > 30 ? 10 : (maxTime > 15 ? 5 : 2);
+      ctx.font = '500 10px "JetBrains Mono", monospace';
+      ctx.fillStyle = '#a1a1aa';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+
+      for (let t = 0; t <= maxTime; t += step) {
+        const x = leftMargin + (t / maxTime) * plotWidth;
+        ctx.strokeStyle = '#e8e8ed';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(x, topMargin);
+        ctx.lineTo(x, topMargin + plotHeight);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillText(`${t}s`, x, topMargin + plotHeight + 6);
       }
 
       if (!ganttData || ganttData.length === 0) {
-        ctx.fillStyle = '#475569';
-        ctx.fillText('No Gantt timeline records yet.', 120, startY + 80);
+        ctx.fillStyle = '#a1a1aa';
+        ctx.font = '500 12px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('No Gantt records yet — Start daemon and submit jobs to populate execution lanes', leftMargin + plotWidth / 2, topMargin + plotHeight / 2);
         return;
       }
 
-      const maxTime = Math.max(10, ...ganttData.map(d => d.time));
-      const scaleX = (w - 120) / maxTime;
-
+      const scaleX = plotWidth / maxTime;
       ganttData.forEach(g => {
         if (g.printer_id >= 0 && g.printer_id < numPrinters) {
-          const x = 80 + g.time * scaleX;
-          const y = startY + g.printer_id * rowHeight;
-          ctx.fillStyle = g.role === 'FACULTY' ? '#f59e0b' : (g.role === 'RESEARCHER' ? '#a855f7' : '#38bdf8');
-          ctx.fillRect(x, y + 5, 8, 30);
+          const x = leftMargin + g.time * scaleX;
+          const y = topMargin + g.printer_id * laneHeight + 6;
+          const barW = Math.max(8, scaleX * 0.4);
+          const barH = laneHeight - 12;
+
+          ctx.fillStyle = g.role === 'FACULTY' ? '#f59e0b' : (g.role === 'RESEARCHER' ? '#8b5cf6' : '#3b82f6');
+          if (ctx.roundRect) {
+            ctx.beginPath();
+            ctx.roundRect(x, y, barW, barH, 4);
+            ctx.fill();
+          } else {
+            ctx.fillRect(x, y, barW, barH);
+          }
+
+          if (barW >= 22) {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '700 9px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`J${g.job_id}`, x + barW / 2, y + barH / 2);
+          }
         }
       });
-    }
+    });
+  }
 
-    // Initialize polling on page load
-    startPolling();
-  </script>
+  // Initialize
+  startPolling();
+</script>
 </body>
 </html>
